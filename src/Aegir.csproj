@@ -3,10 +3,16 @@
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
     <AssemblyName>Aegir</AssemblyName>
-    <Description>My first plugin</Description>
-    <Version>0.0.1</Version>
+    <Description>Simple mod for disabling water camera clipping</Description>
+    <Version>0.1.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- CHANGE to your Steam library path -->
+    <!-- e.g. "C:\Program Files (x86)\Steam" -->
+    <SteamPath>...</SteamPath>
   </PropertyGroup>
 
   <ItemGroup>
