@@ -15,6 +15,11 @@
     <SteamPath>...</SteamPath>
   </PropertyGroup>
 
+  <Target Name="PreResolveClean" BeforeTargets="BeforeResolveReferences">
+    <CallTarget Targets="Clean" />
+    <Message Text="Build directories cleaned" Importance="high" />
+  </Target>
+
   <ItemGroup>
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.*" />
