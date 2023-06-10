@@ -11,13 +11,21 @@
 
   <PropertyGroup>
     <!-- CHANGE to your Steam library path -->
-    <!-- e.g. "C:\Program Files (x86)\Steam" -->
+    <!-- e.g. "C:\Program Files (x86)\Steam\steamapps\common\Valheim" -->
     <SteamPath>...</SteamPath>
   </PropertyGroup>
 
   <Target Name="PreResolveClean" BeforeTargets="BeforeResolveReferences">
     <CallTarget Targets="Clean" />
     <Message Text="Build directories cleaned" Importance="high" />
+  </Target>
+
+  <Target 
+      Name="CreateArchiveAfterBuild" 
+      BeforeTargets="AfterBuild" 
+      Condition=" '$(Configuration)' == 'Release' ">
+    <Exec Command="dotnet fsi ..\scripts\pack.fsx $(AssemblyName)-$(Version)" />
+    <Message Text="Pack complete" Importance="high" />
   </Target>
 
   <ItemGroup>
@@ -33,7 +41,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="$(SteamPath)\steamapps\common\Valheim\valheim_Data\Managed\*.dll" />
+    <Reference Include="$(SteamPath)\valheim_Data\Managed\*.dll" />
   </ItemGroup>
 
 </Project>

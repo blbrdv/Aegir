@@ -25,3 +25,6 @@ TestResult.xml
 nunit-*.xml
 
 .fake
+
+# zip release directory
+out
