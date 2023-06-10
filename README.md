@@ -7,7 +7,7 @@
 
 > **Aegir** is a jötunn and a personification of the sea in Norse mythology.
 
-This simple mod removes camera water clipping in fly-mode, allowing players to dig and
+This simple mod removes water camera clipping in fly-mode, allowing players to dig and
  build underwater without problems.
 
 <!--`TODO video`-->
