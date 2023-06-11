@@ -28,3 +28,4 @@ nunit-*.xml
 
 # zip release directory
 out
+_temp

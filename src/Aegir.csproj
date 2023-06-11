@@ -4,7 +4,7 @@
     <TargetFramework>net46</TargetFramework>
     <AssemblyName>Aegir</AssemblyName>
     <Description>Simple mod for disabling water camera clipping</Description>
-    <Version>0.1.0</Version>
+    <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
@@ -13,6 +13,9 @@
     <!-- CHANGE to your Steam library path -->
     <!-- e.g. "C:\Program Files (x86)\Steam\steamapps\common\Valheim" -->
     <SteamPath>...</SteamPath>
+    <DistPath>../dist</DistPath>
+    <TempPath>../_temp</TempPath>
+    <OutPath>../out</OutPath>
   </PropertyGroup>
 
   <Target Name="PreResolveClean" BeforeTargets="BeforeResolveReferences">
@@ -20,11 +23,20 @@
     <Message Text="Build directories cleaned" Importance="high" />
   </Target>
 
-  <Target 
-      Name="CreateArchiveAfterBuild" 
-      BeforeTargets="AfterBuild" 
-      Condition=" '$(Configuration)' == 'Release' ">
-    <Exec Command="dotnet fsi ..\scripts\pack.fsx $(AssemblyName)-$(Version)" />
+  <Target Name="CreateArchiveAfterBuild" 
+          BeforeTargets="AfterBuild" 
+          Condition=" '$(Configuration)' == 'Release' ">
+    <Delete Files="$(OutPath)/$(AssemblyName)-$(Version).zip" />
+    <Copy SourceFiles=
+            "$(DistPath)/icon.png;
+            $(DistPath)/manifest.json;
+            $(DistPath)/README.md;
+            bin/Release/net46/$(AssemblyName).dll"
+          DestinationFolder="$(TempPath)" />
+    <MakeDir Directories="$(OutPath)" />
+    <ZipDirectory SourceDirectory="$(TempPath)"
+                  DestinationFile="$(OutPath)/$(AssemblyName)-$(Version).zip" />
+    <RemoveDir Directories="$(TempPath)" />
     <Message Text="Pack complete" Importance="high" />
   </Target>
 
