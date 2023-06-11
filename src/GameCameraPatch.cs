@@ -9,6 +9,7 @@ namespace Aegir
     [HarmonyPatch(typeof(GameCamera))]
     public class GameCameraPatch
     {
+        
         public static float DefaultMinWaterDistance { get; private set; }
 
         [HarmonyPostfix]
