@@ -4,7 +4,7 @@
     <TargetFramework>net46</TargetFramework>
     <AssemblyName>Aegir</AssemblyName>
     <Description>Simple mod for disabling water camera clipping</Description>
-    <Version>0.1.0</Version>
+    <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
@@ -23,10 +23,9 @@
     <Message Text="Build directories cleaned" Importance="high" />
   </Target>
 
-  <Target 
-      Name="CreateArchiveAfterBuild" 
-      BeforeTargets="AfterBuild" 
-      Condition=" '$(Configuration)' == 'Release' ">
+  <Target Name="CreateArchiveAfterBuild" 
+          BeforeTargets="AfterBuild" 
+          Condition=" '$(Configuration)' == 'Release' ">
     <Delete Files="$(OutPath)/$(AssemblyName)-$(Version).zip" />
     <Copy SourceFiles=
             "$(DistPath)/icon.png;
