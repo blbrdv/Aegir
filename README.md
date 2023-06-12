@@ -10,7 +10,7 @@
 This simple mod removes water camera clipping in fly-mode, allowing players to dig and
  build underwater without problems.
 
-<!--`TODO video`-->
+![Screenshot](screenshot.jpg)
 
 ## Installing
 
