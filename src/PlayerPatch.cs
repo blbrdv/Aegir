@@ -1,4 +1,8 @@
 using System;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+using System.Collections.Generic;
 using BepInEx;
 using HarmonyLib;
 using UnityEngine;
@@ -23,6 +27,70 @@ namespace Aegir
 
             GameCamera.instance.m_minWaterDistance = distance;
             Plugin.Logger.LogDebug($"Min water distance set to {distance}");
+        }
+
+        // Adding line into HUD left corner message indicating camera clipping status
+        [HarmonyTranspiler]
+        [HarmonyPatch("ToggleDebugFly")]
+	    static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var code = new List<CodeInstruction>(instructions);
+
+            var str = typeof(String);
+
+            // call string [System.Runtime]System.String::Concat(string, string)
+            var concatOperand = AccessTools.Method(typeof(System.String), "Concat", new Type[] { str, str });
+            // call string [System.Runtime]System.String::Concat(string, string, string, string)
+            var newConcatInstruction = new CodeInstruction(
+                    OpCodes.Call,
+                    AccessTools.Method(
+                        typeof(System.String), 
+                        "Concat", 
+                        new Type[] { str, str, str, str }));
+                        
+            var newInstructions = new List<CodeInstruction>() {
+                // ldstr "\nCamera clipping:"
+                new CodeInstruction(OpCodes.Ldstr, "\nCamera clipping:"),
+
+                // ldarg.0
+                new CodeInstruction(OpCodes.Ldarg_0),
+
+                // ldfld bool PLayer::m_debugFly
+                new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(Player), "m_debugFly")),
+
+                // ldc.i4.0
+                new CodeInstruction(OpCodes.Ldc_I4_0),
+
+                // ceq
+                new CodeInstruction(OpCodes.Ceq),
+
+                // stloc.0
+                new CodeInstruction(OpCodes.Stloc_0),
+
+                // ldloca.s 0
+                new CodeInstruction(OpCodes.Ldloca_S, (byte)0),
+
+                // call instance string [System.Runtime]System.Boolean::ToString()
+                new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(System.Boolean), "ToString"))
+            };
+
+            var insertingAt = -1;
+            for (var index = 0; index < code.Count(); index++)
+            {
+                if (code[index].opcode == OpCodes.Call && (MethodInfo)code[index].operand == concatOperand)
+                {
+                    insertingAt = index;
+                    break;
+                }
+            }
+
+            if (insertingAt != -1)
+            {
+                code[insertingAt] = newConcatInstruction;
+                code.InsertRange(insertingAt, newInstructions);
+            }
+
+            return code.AsEnumerable();
         }
 
     }
