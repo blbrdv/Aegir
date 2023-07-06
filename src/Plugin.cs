@@ -17,7 +17,7 @@ namespace Aegir
 
             harmony.PatchAll();
 
-            Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
+            Logger.LogMessage($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
         }
     }
 }
