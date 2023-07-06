@@ -10,35 +10,10 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- CHANGE to your Steam library path -->
-    <!-- e.g. "C:\Program Files (x86)\Steam\steamapps\common\Valheim" -->
-    <SteamPath>...</SteamPath>
-    <DistPath>../dist</DistPath>
-    <TempPath>../_temp</TempPath>
-    <OutPath>../out</OutPath>
+    <ToolsPath Condition=" '$(GAME_PATH)' == '' ">
+        C:\Program Files (x86)\Steam\steamapps\common\Valheim
+    </ToolsPath>
   </PropertyGroup>
-
-  <Target Name="PreResolveClean" BeforeTargets="BeforeResolveReferences">
-    <CallTarget Targets="Clean" />
-    <Message Text="Build directories cleaned" Importance="high" />
-  </Target>
-
-  <Target Name="CreateArchiveAfterBuild" 
-          BeforeTargets="AfterBuild" 
-          Condition=" '$(Configuration)' == 'Release' ">
-    <Delete Files="$(OutPath)/$(AssemblyName)-$(Version).zip" />
-    <Copy SourceFiles=
-            "$(DistPath)/icon.png;
-            $(DistPath)/manifest.json;
-            $(DistPath)/README.md;
-            bin/Release/net46/$(AssemblyName).dll"
-          DestinationFolder="$(TempPath)" />
-    <MakeDir Directories="$(OutPath)" />
-    <ZipDirectory SourceDirectory="$(TempPath)"
-                  DestinationFile="$(OutPath)/$(AssemblyName)-$(Version).zip" />
-    <RemoveDir Directories="$(TempPath)" />
-    <Message Text="Pack complete" Importance="high" />
-  </Target>
 
   <ItemGroup>
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
@@ -53,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="$(SteamPath)\valheim_Data\Managed\*.dll" />
+    <Reference Include="$(GAME_PATH)\valheim_Data\Managed\*.dll" />
   </ItemGroup>
 
 </Project>
