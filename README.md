@@ -32,7 +32,19 @@ In game:
 
 ## Build
 
-1. Paste path to directory of the Game in [csproj](src/Aegir.csproj) file `SteamPath` 
-property
-2. Run `dotnet build . -c Release` for compiling project and packing it in 
-`out\Aegir-<version>.zip` file
+### Requirements
+
+- DotNet v6.0.x installed
+    - Download and install from [Microsoft](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
+- Nuke tool installed
+    - Run `dotnet tool restore` in solution root directory.
+- Correct path to game directory in config
+    1. Create `build.cgf` in solution root directory
+    2. Copy everything from `build.example.cfg` to `build.cfg`
+    3. Update paths if needed
+
+### Build steps
+
+1. Run `./build.sh Compile` (or `.\build.ps1 ...` for Windows)
+
+For more commands see [Build.cs](build/Build.cs) file or run build with `--help` flag.
