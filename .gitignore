@@ -29,5 +29,8 @@ nunit-*.xml
 .nuke/temp
 
 # zip release directory
-out
+output
 _temp
+
+# build config
+build.cfg
