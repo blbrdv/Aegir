@@ -23,7 +23,7 @@ class Build : NukeBuild
 
     readonly Section GamePaths = Cfg.LoadFromFile("build.cfg")["Paths"];
     
-    Project AegirProject => Solution.Aegir;
+    Project AegirProject => Solution.Aegir; // just ignore CS1061, it's fine
     string ProjectTargetFramework => AegirProject.GetTargetFrameworks().First();
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath OutputDirectory => RootDirectory / "output";
