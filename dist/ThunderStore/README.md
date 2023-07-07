@@ -16,11 +16,8 @@ In game:
 5. Press `Z` to enter fly mode
 6. Enjoy
 
-## Source code
+## Links
 
-Source code of this project hosted on [GitHub](https://github.com/blbrdv/Aegir).
-
-## License
-
-Aegir is licensed under the [Zero-Clause BSD](https://opensource.org/license/0bsd/) 
-license.
+- Release page on [NexusMods](https://www.nexusmods.com/valheim/mods/2400)
+- Source code on [GitHub](https://github.com/blbrdv/Aegir)
+- License: [Zero-Clause BSD](https://opensource.org/license/0bsd/)
