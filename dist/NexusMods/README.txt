@@ -13,7 +13,7 @@ dig and build underwater without problems.
 In game:
 
     1. Open console (F5)
-    2. Enter "discommends"
+    2. Enter "devcommands"
     3. Enter "debugmode"
     4. Close console
     5. Press "Z" to enter fly mode
