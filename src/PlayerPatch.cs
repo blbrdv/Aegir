@@ -12,6 +12,9 @@ namespace Aegir
     public class PlayerPatch
     {
 
+        readonly static Type str = typeof(string);
+
+
         [HarmonyPostfix]
         [HarmonyPatch("ToggleDebugFly")]
         static void ToggleDebugFlyPostfix(bool ___m_debugFly)
@@ -34,15 +37,13 @@ namespace Aegir
         {
             var code = new List<CodeInstruction>(instructions);
 
-            var str = typeof(String);
-
             // call string [System.Runtime]System.String::Concat(string, string)
-            var concatOperand = AccessTools.Method(typeof(System.String), "Concat", new Type[] { str, str });
+            var concatOperand = AccessTools.Method(str, "Concat", new Type[] { str, str });
             // call string [System.Runtime]System.String::Concat(string, string, string, string)
             var newConcatInstruction = new CodeInstruction(
                     OpCodes.Call,
                     AccessTools.Method(
-                        typeof(System.String), 
+                        str, 
                         "Concat", 
                         new Type[] { str, str, str, str }));
 
@@ -69,7 +70,7 @@ namespace Aegir
                 new CodeInstruction(OpCodes.Ldloca_S, (byte)0),
 
                 // call instance string [System.Runtime]System.Boolean::ToString()
-                new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(System.Boolean), "ToString"))
+                new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(bool), "ToString"))
             };
 
             var insertingAt = -1;
