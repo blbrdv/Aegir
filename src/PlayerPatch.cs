@@ -33,7 +33,7 @@ namespace Aegir
         // Adding line into HUD left corner message indicating camera clipping status
         [HarmonyTranspiler]
         [HarmonyPatch("ToggleDebugFly")]
-	    static IEnumerable<CodeInstruction> ToggleDebugFlyTranspiler(IEnumerable<CodeInstruction> instructions)
+	    static IEnumerable<CodeInstruction> ToggleDebugFlyTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
             var code = new List<CodeInstruction>(instructions);
 
@@ -47,6 +47,8 @@ namespace Aegir
                         "Concat", 
                         new Type[] { str, str, str, str }));
 
+
+            var local = generator.DeclareLocal(typeof(bool));
             var newInstructions = new List<CodeInstruction>() {
                 // ldstr "\nCamera clipping:"
                 new CodeInstruction(OpCodes.Ldstr, "\nCamera clipping:"),
@@ -63,8 +65,8 @@ namespace Aegir
                 // ceq
                 new CodeInstruction(OpCodes.Ceq),
 
-                // stloc.0
-                new CodeInstruction(OpCodes.Stloc_0),
+                // stloc.0 (local)
+                new CodeInstruction(OpCodes.Stloc, local),
 
                 // ldloca.s 0
                 new CodeInstruction(OpCodes.Ldloca_S, (byte)0),
