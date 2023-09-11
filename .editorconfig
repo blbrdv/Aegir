@@ -11,3 +11,6 @@ insert_final_newline = true
 
 [*.{csproj,Config}]
 indent_size = 2
+
+[*.cs]
+dotnet_diagnostic.IDE0051.severity = none

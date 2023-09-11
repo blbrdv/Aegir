@@ -1,3 +1,5 @@
+# VS
+.vs
 
 # Build results
 [Dd]ebug/
@@ -24,8 +26,13 @@ bld/
 TestResult.xml
 nunit-*.xml
 
+// build
 .fake
+.nuke/temp
 
 # zip release directory
-out
+output
 _temp
+
+# build config
+build.cfg

@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aegir", "src\Aegir.csproj", "{D430F528-3796-4D46-A563-57C5EB86C6E2}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{3F75A95E-33E6-484B-AC8D-AB0F79401F9F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,6 +16,8 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3F75A95E-33E6-484B-AC8D-AB0F79401F9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F75A95E-33E6-484B-AC8D-AB0F79401F9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D430F528-3796-4D46-A563-57C5EB86C6E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D430F528-3796-4D46-A563-57C5EB86C6E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D430F528-3796-4D46-A563-57C5EB86C6E2}.Release|Any CPU.ActiveCfg = Release|Any CPU

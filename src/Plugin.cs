@@ -7,7 +7,7 @@ namespace Aegir
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class Plugin : BaseUnityPlugin
     {
-        private readonly Harmony harmony = new Harmony(PluginInfo.PLUGIN_GUID);
+        private readonly Harmony harmony = new(PluginInfo.PLUGIN_GUID);
 
         internal static new ManualLogSource Logger;
 
@@ -16,8 +16,7 @@ namespace Aegir
             Logger = base.Logger;
 
             harmony.PatchAll();
-
-            Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
+            Logger.LogMessage($"Plugin is loaded!");
         }
     }
 }

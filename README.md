@@ -3,7 +3,7 @@
 [![Thunderstore](https://img.shields.io/badge/-THUNDERSTORE-375a7f?style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAMAAAANIilAAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAEVQTFRFAAAAS0tLnp6eyMjIu7u7dXV1////W1tb1tbW1dXV8fHxMzMzkZGR8vLy4+Pj5OTkZmZmhISEra2turq6n5+fdHR0rKysBxBkhQAAABd0Uk5TACKm5NFm/zj59/8Kkv///1B8vdCoZbvKQGgQAAABoElEQVR4nO1W25aDIAysqyxWxFvd/f9P3UZKICGR9uyrc04fQCYTJgF6u1248Dmar7aCTuWa7yqMxrV1bq8K3+tk+4+k9R0PdbLTuGOdO2pcV+d6Nek2LumNtXaKo9YmqEljmWYy0u3NgVILjDoUfoe7ktXuM2EsUwOjjYaKff2QuXtcvdFQQRi9FEuFaYZiYMVn9nmQ/Gah0bx4hFhiBAtVMnQI8LqBtEz8cJk8XlG6kX5hp3o/Jnu+k0I42NER7usQYsQ75TZ0i/SA4M0xxxmFPB3DNTREWOyxNpNMTkGbbLKlM5g2v8SYYdni5A5WoLg9UXqhwqkbVyE+z2kiM1k7sWYnKDq/pbs7a8+s85OwFz578SJioZ918Zn150cy63zgGOoqvd4EoJ17EM412LkREMvlDuHcmJMysdy2QylvI0evNxltEgaj3eui/8GkpTKhAiyAAziB0U3x6ulvDWAMDbQeRpcvpvrIBfjDkgFWlc+8VqYIA8LjJnL1MkVAjUH8UXLfe7Oev9+SKzc1h5O56h8ohqb84za+pXvhAsMfQtwfF40Hqt0AAAAASUVORK5CYII=)](https://valheim.thunderstore.io/package/blbrdv/Aegir/)
 
 ![License](https://img.shields.io/github/license/blbrdv/Aegir?style=flat-square)
-![Valheim version](https://img.shields.io/badge/supported-v0.214.2-green?style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAMAAAANIilAAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAVZQTFRFAAAA////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////MhOoIAAAAHJ0Uk5TAAU1NiYjFQgWDjooCTs+Ej8KAhEBBC4DBoN4LxApB33/iXAlHRp/Jytx5yH0DYwYIhw4Dx4yCxTvG5Pppzc8VhMZozMqb8/1+Rc0u+At10zGHz3hLOagMQx+Ql6Oae4wyctyIOKGWSTDTTmSq4ph2Whfgk9v1wAAAuBJREFUeJzdltlD00AQxr/QNKXQllATWmwt1aJUC5SjtlYtouDRKiqI4o03nqj//4uTbDa7hZy+6feQ7M7ml9md2cwG+OeljCRUW0lNS40mxEB6bDxNt0w2p2Z82Al9kq75E4Zpd6fc5wq5onWbPllCOXvKG9YrwEzV1ukz1K7xgdmzqDo6Z84lPeE6zleFLkDlAw1tXtgXsp6wComtLqLJB5aSkn15xRNODMFYzfOBEXOGW6dbF73XnGtrgq1BrE0Hf225M+bNUkIgfEMseaHE7ZeQNXxgdJeBlAOPY4mb6y1cZsZS15eFoRdc31dgTvJZV7jR8I40U60BXD027577xvRaAKxQaK65sM6M5jquM9ONjXYAjE3y58A3sdJhSwZuMVMzF8TCoCdvc9ftEctU0JHnSw6aNUlX2ALvuPPuD3CXsa3MZjCsNhh8z9qf5S2yDFI8XHYqg1Shr/i+G7Jey3L/gPfV1WAYlMmmCxtzyugSd/wQ9UoIvN10s2p1czuG6CaCURJF1AnQI6urSO/SQ2HK5aLkmkqB2wvJFGk3jZrzOPP0mHWeILUXCjfGxYdpG9z2zkIo/HQHeOYJ90JZYAN47gAULbxgzZfIh2wRW+vC2ytqvuaOuxFY2s3Avpg3a7yJEmtLCaTyR2Gg7Ff6hrVGW/gtY96hzuGN8Fhbek/nTIW7/sDh4EIglIVIELt9hNaIATv7yqm5JvbMiLBaBj5VZaEYddboHAAlmf2M/Vo45sjKigz3MYjMyhFjs076HzPHpLaG4UJ4GRBqDobgLxNfY8Amxfaby85DC69e8ryBlgtvY3YrDqysDp3z++k4MKhcfXfYH1SAYrGQjnmq/VEKkKReR4I73v9tvlrf5TCluO73w+knYg4dxxFOiiNa7jquKXjRSp+k4gqHi4NCXBhTTfy04USMj4LLXLN/6A61mHliUlT8qv6OHy2mA+sHd6v/dzAOZjGIuT/+f/0BB3R/4s/pQgkAAAAASUVORK5CYII=)
+![Valheim version](https://img.shields.io/badge/supported-v0.216.9-green?style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAMAAAANIilAAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAVZQTFRFAAAA////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////MhOoIAAAAHJ0Uk5TAAU1NiYjFQgWDjooCTs+Ej8KAhEBBC4DBoN4LxApB33/iXAlHRp/Jytx5yH0DYwYIhw4Dx4yCxTvG5Pppzc8VhMZozMqb8/1+Rc0u+At10zGHz3hLOagMQx+Ql6Oae4wyctyIOKGWSTDTTmSq4ph2Whfgk9v1wAAAuBJREFUeJzdltlD00AQxr/QNKXQllATWmwt1aJUC5SjtlYtouDRKiqI4o03nqj//4uTbDa7hZy+6feQ7M7ml9md2cwG+OeljCRUW0lNS40mxEB6bDxNt0w2p2Z82Al9kq75E4Zpd6fc5wq5onWbPllCOXvKG9YrwEzV1ukz1K7xgdmzqDo6Z84lPeE6zleFLkDlAw1tXtgXsp6wComtLqLJB5aSkn15xRNODMFYzfOBEXOGW6dbF73XnGtrgq1BrE0Hf225M+bNUkIgfEMseaHE7ZeQNXxgdJeBlAOPY4mb6y1cZsZS15eFoRdc31dgTvJZV7jR8I40U60BXD027577xvRaAKxQaK65sM6M5jquM9ONjXYAjE3y58A3sdJhSwZuMVMzF8TCoCdvc9ftEctU0JHnSw6aNUlX2ALvuPPuD3CXsa3MZjCsNhh8z9qf5S2yDFI8XHYqg1Shr/i+G7Jey3L/gPfV1WAYlMmmCxtzyugSd/wQ9UoIvN10s2p1czuG6CaCURJF1AnQI6urSO/SQ2HK5aLkmkqB2wvJFGk3jZrzOPP0mHWeILUXCjfGxYdpG9z2zkIo/HQHeOYJ90JZYAN47gAULbxgzZfIh2wRW+vC2ytqvuaOuxFY2s3Avpg3a7yJEmtLCaTyR2Gg7Ff6hrVGW/gtY96hzuGN8Fhbek/nTIW7/sDh4EIglIVIELt9hNaIATv7yqm5JvbMiLBaBj5VZaEYddboHAAlmf2M/Vo45sjKigz3MYjMyhFjs076HzPHpLaG4UJ4GRBqDobgLxNfY8Amxfaby85DC69e8ryBlgtvY3YrDqysDp3z++k4MKhcfXfYH1SAYrGQjnmq/VEKkKReR4I73v9tvlrf5TCluO73w+knYg4dxxFOiiNa7jquKXjRSp+k4gqHi4NCXBhTTfy04USMj4LLXLN/6A61mHliUlT8qv6OHy2mA+sHd6v/dzAOZjGIuT/+f/0BB3R/4s/pQgkAAAAASUVORK5CYII=)
 
 > **Aegir** is a jötunn and a personification of the sea in Norse mythology.
 
@@ -12,16 +12,17 @@ This simple mod removes water camera clipping in fly-mode, allowing players to d
 
 ![Screenshot](screenshot.jpg)
 
-## Installing
+## Installing & Using
+
+### Install
 
 1. Download and install **BepInEx** from 
 [Thunderstore](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/)
-2. Download and install this mod from [Nexusmods](https://www.nexusmods.com/valheim/mods/2400), [Thunderstore](https://valheim.thunderstore.io/package/blbrdv/Aegir/) or from [GitHub
+2. For **multiplayer only** - download [Quality of Life](https://www.nexusmods.com/valheim/mods/104) mod and install it locally
+3. Download and install locally this mod from [Nexusmods](https://www.nexusmods.com/valheim/mods/2400), [Thunderstore](https://valheim.thunderstore.io/package/blbrdv/Aegir/) or from [GitHub
  release page](https://github.com/blbrdv/Aegir/releases)
 
-## Using
-
-In game:
+### Singleplayer usage
 
 1. Open console (F5)
 2. Enter `devcommands`
@@ -30,9 +31,39 @@ In game:
 5. Press `Z` to enter fly mode
 6. Enjoy
 
+### Multiplayer usage
+
+1. Open menu (F3)
+2. Turn on `Developer mode`
+3. Close menu
+4. Press `Z` to enter fly mode
+5. Enjoy
+
 ## Build
 
-1. Paste path to directory of the Game in [csproj](src/Aegir.csproj) file `SteamPath` 
-property
-2. Run `dotnet build . -c Release` for compiling project and packing it in 
-`out\Aegir-<version>.zip` file
+### Requirements
+
+- DotNet v6.0.x installed
+    - Download and install from [Microsoft](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
+- Nuke tool installed
+    - Run `dotnet tool restore` in solution root directory.
+- Correct path to game directory in config
+    1. Create `build.cgf` in solution root directory
+    2. Copy everything from `build.example.cfg` to `build.cfg`
+    3. Update paths if needed
+
+### Build steps
+
+1. Run `./build.sh Compile` (or `.\build.ps1 ...` for Windows)
+
+For more commands see [Build.cs](build/Build.cs) file or run build with `--help` flag.
+
+### FAQ
+
+1. Mod does not create config file?
+
+Yes it doesn't. Mod is so small it do not need it.
+
+2. Does this mod needs to be installed on server to work in multiplayer?
+
+No, See `Install` in `Installing & Using` in description.

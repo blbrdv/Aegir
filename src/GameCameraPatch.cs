@@ -1,7 +1,4 @@
-using System;
-using BepInEx;
 using HarmonyLib;
-using UnityEngine;
 
 namespace Aegir
 {
