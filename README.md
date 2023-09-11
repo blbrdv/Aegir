@@ -12,16 +12,17 @@ This simple mod removes water camera clipping in fly-mode, allowing players to d
 
 ![Screenshot](screenshot.jpg)
 
-## Installing
+## Installing & Using
+
+### Install
 
 1. Download and install **BepInEx** from 
 [Thunderstore](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/)
-2. Download and install this mod from [Nexusmods](https://www.nexusmods.com/valheim/mods/2400), [Thunderstore](https://valheim.thunderstore.io/package/blbrdv/Aegir/) or from [GitHub
+2. For **multiplayer only** - download [Quality of Life](https://www.nexusmods.com/valheim/mods/104) mod and install it locally
+3. Download and install locally this mod from [Nexusmods](https://www.nexusmods.com/valheim/mods/2400), [Thunderstore](https://valheim.thunderstore.io/package/blbrdv/Aegir/) or from [GitHub
  release page](https://github.com/blbrdv/Aegir/releases)
 
-## Using
-
-In game:
+### Singleplayer usage
 
 1. Open console (F5)
 2. Enter `devcommands`
@@ -29,6 +30,14 @@ In game:
 4. Close console
 5. Press `Z` to enter fly mode
 6. Enjoy
+
+### Multiplayer usage
+
+1. Open menu (F3)
+2. Turn on `Developer mode`
+3. Close menu
+4. Press `Z` to enter fly mode
+5. Enjoy
 
 ## Build
 
@@ -48,3 +57,13 @@ In game:
 1. Run `./build.sh Compile` (or `.\build.ps1 ...` for Windows)
 
 For more commands see [Build.cs](build/Build.cs) file or run build with `--help` flag.
+
+### FAQ
+
+1. Mod does not create config file?
+
+Yes it doesn't. Mod is so small it do not need it.
+
+2. Does this mod needs to be installed on server to work in multiplayer?
+
+No, See `Install` in `Installing & Using` in description.
