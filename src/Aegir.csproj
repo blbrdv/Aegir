@@ -5,7 +5,7 @@
     <AssemblyName>Aegir</AssemblyName>
     <Product>Aegir</Product>
     <Description>Simple mod for disabling water camera clipping</Description>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <DebugType>none</DebugType>
