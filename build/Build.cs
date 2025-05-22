@@ -6,6 +6,7 @@ using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Utilities.Collections;
+using Serilog;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using SharpConfig;
 using Cfg = SharpConfig.Configuration;
@@ -39,6 +40,7 @@ class Build : NukeBuild
     AbsolutePath BuildDirectory => SourceDirectory / "bin" / BuildConfig / ProjectTargetFramework;
     string CompiledFileName => AegirProject.Name + ".dll";
     AbsolutePath CompiledFilePath => BuildDirectory / CompiledFileName;
+    AbsolutePath CompiledPluginPath => PluginsDirectory / CompiledFileName; 
     string PackedFileName => AegirProject.Name + "-" + AegirProject.GetProperty("version") + ".zip";
 
     /// <summary>Clean build and output directories</summary>
@@ -46,7 +48,14 @@ class Build : NukeBuild
         .Before(Restore)
         .Executes(() =>
         {
-            SourceDirectory.GlobDirectories("**/bin", "**/obj").DeleteDirectories();
+            var buildDirs = SourceDirectory.GlobDirectories("**/bin", "**/obj");
+            if (buildDirs.Count > 0)
+            {
+                Log.Information("Removing dirs [{0}]", string.Join(", ", buildDirs));
+                buildDirs.DeleteDirectories();
+            }
+
+            Log.Information("Removing {0}", OutputDirectory);
             OutputDirectory.CreateOrCleanDirectory();
         });
 
@@ -58,6 +67,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             Environment.SetEnvironmentVariable("GAME_PATH", GameDirectory);
+            Log.Debug("Env GAME_PATH set to {Path}", GameDirectory);
 
             DotNetRestore(s => s
                 .SetProjectFile(Solution));
@@ -72,6 +82,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             Environment.SetEnvironmentVariable("GAME_PATH", GameDirectory);
+            Log.Debug("Env GAME_PATH set to {Path}", GameDirectory);
 
             DotNetBuild(s => s
                 .SetProjectFile(Solution)
@@ -83,8 +94,11 @@ class Build : NukeBuild
     Target Install => _ => _
         .DependsOn(Compile)
         .Executes(() => {
-            (PluginsDirectory / CompiledFileName).DeleteFile();
+            CompiledPluginPath.DeleteFile();
+            Log.Information("Deleting {Path}", CompiledPluginPath);
+
             CompiledFilePath.CopyToDirectory(PluginsDirectory);
+            Log.Information("Plugin copied to {Target}", PluginsDirectory);
         });
 
     /// <summary>Pack compiled and other necessary files to zip for NexusMods in output directory</summary>
@@ -101,6 +115,7 @@ class Build : NukeBuild
                 .ForEach(file => file.CopyToDirectory(NexusModsOutputDirectory));
 
             ArchiveDirectory.DeleteDirectory();
+            Log.Information("Packed files to {Target}", NexusModsOutputDirectory);
         });
 
     /// <summary>Pack compiled and other necessary files to zip for ThunderStore in output directory</summary>
@@ -115,11 +130,15 @@ class Build : NukeBuild
             ArchiveDirectory.ZipTo(ThunderStoreOutputDirectory / PackedFileName);
 
             ArchiveDirectory.DeleteDirectory();
+            Log.Information("Packed files to {Target}", ThunderStoreOutputDirectory);
         });
 
     /// <summary>Pack compiled and other necessary files to zip in output directory</summary>
     Target Pack => _ => _
         .DependsOn(PackForNexusmods)
         .DependsOn(PackForThunderstore)
-        .Executes(() => {});
+        .Executes(() =>
+        {
+            Log.Information("Packed files to {Target}", OutputDirectory);
+        });
 }
