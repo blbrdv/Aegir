@@ -4,10 +4,10 @@ using HarmonyLib;
 
 namespace Aegir
 {
-    [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
+    [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
     public class Plugin : BaseUnityPlugin
     {
-        private readonly Harmony harmony = new(PluginInfo.PLUGIN_GUID);
+        private readonly Harmony harmony = new(MyPluginInfo.PLUGIN_GUID);
 
         internal static new ManualLogSource Logger;
 
