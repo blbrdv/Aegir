@@ -6,10 +6,11 @@ using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Utilities.Collections;
-using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using SharpConfig;
 using Cfg = SharpConfig.Configuration;
+// ReSharper disable AllUnderscoreLocalParameterName
+// ReSharper disable UnusedMember.Local
 
 class Build : NukeBuild
 {
@@ -24,7 +25,7 @@ class Build : NukeBuild
     readonly Section GamePaths = Cfg.LoadFromFile("build.cfg")["Paths"];
     
     Project AegirProject => Solution.Aegir; // just ignore CS1061, it's fine
-    string ProjectTargetFramework => AegirProject.GetTargetFrameworks().First();
+    string ProjectTargetFramework => AegirProject.GetTargetFrameworks()!.First();
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath OutputDirectory => RootDirectory / "output";
     AbsolutePath NexusModsOutputDirectory => OutputDirectory / "NexusMods";
@@ -40,7 +41,6 @@ class Build : NukeBuild
     AbsolutePath CompiledFilePath => BuildDirectory / CompiledFileName;
     string PackedFileName => AegirProject.Name + "-" + AegirProject.GetProperty("version") + ".zip";
 
-
     /// <summary>Clean build and output directories</summary>
     Target Clean => _ => _
         .Before(Restore)
@@ -49,7 +49,6 @@ class Build : NukeBuild
             SourceDirectory.GlobDirectories("**/bin", "**/obj").DeleteDirectories();
             OutputDirectory.CreateOrCleanDirectory();
         });
-
 
     /// <summary>Look for and download project dependencies</summary>
     Target Restore => _ => _
@@ -63,7 +62,6 @@ class Build : NukeBuild
             DotNetRestore(s => s
                 .SetProjectFile(Solution));
         });
-
 
     /// <summary>Build project</summary>
     Target Compile => _ => _
@@ -81,53 +79,47 @@ class Build : NukeBuild
                 .EnableNoRestore());
         });
 
-
     /// <summary>Copy compiled file to game plugins directory</summary>
     Target Install => _ => _
         .DependsOn(Compile)
         .Executes(() => {
             (PluginsDirectory / CompiledFileName).DeleteFile();
-            CopyFileToDirectory(CompiledFilePath, PluginsDirectory);
+            CompiledFilePath.CopyToDirectory(PluginsDirectory);
         });
 
-
-    /// <summary>Pack compiled and other necassery files to zip for NexusMods in output directory</summary>
+    /// <summary>Pack compiled and other necessary files to zip for NexusMods in output directory</summary>
     Target PackForNexusmods => _ => _
         .DependsOn(Compile)
         .Executes(() =>
         {
             ArchiveDirectory.CreateOrCleanDirectory();
 
-            CopyFileToDirectory(CompiledFilePath, ArchiveDirectory);
+            CompiledFilePath.CopyToDirectory(ArchiveDirectory);
             ArchiveDirectory.ZipTo(NexusModsOutputDirectory / PackedFileName);
             NexusModsDistDirectory
                 .GetFiles()
-                .ForEach(file => CopyFileToDirectory(file, NexusModsOutputDirectory));
+                .ForEach(file => file.CopyToDirectory(NexusModsOutputDirectory));
 
             ArchiveDirectory.DeleteDirectory();
         });
 
-
-    /// <summary>Pack compiled and other necassery files to zip for ThunderStore in output directory</summary>
+    /// <summary>Pack compiled and other necessary files to zip for ThunderStore in output directory</summary>
     Target PackForThunderstore => _ => _
         .DependsOn(Compile)
         .Executes(() =>
         {
             ArchiveDirectory.CreateOrCleanDirectory();
 
-            CopyFileToDirectory(CompiledFilePath, ArchiveDirectory);
-            ThunderStoreDistDirectory.GetFiles().ForEach(file => CopyFileToDirectory(file, ArchiveDirectory));
+            CompiledFilePath.CopyToDirectory(ArchiveDirectory);
+            ThunderStoreDistDirectory.GetFiles().ForEach(file => file.CopyToDirectory(ArchiveDirectory));
             ArchiveDirectory.ZipTo(ThunderStoreOutputDirectory / PackedFileName);
 
             ArchiveDirectory.DeleteDirectory();
         });
 
-
-    /// <summary>Pack compiled and other necassery files to zip in output directory</summary>
+    /// <summary>Pack compiled and other necessary files to zip in output directory</summary>
     Target Pack => _ => _
         .DependsOn(PackForNexusmods)
         .DependsOn(PackForThunderstore)
         .Executes(() => {});
-
-
 }
