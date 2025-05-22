@@ -2,21 +2,20 @@
 using BepInEx.Logging;
 using HarmonyLib;
 
-namespace Aegir
+namespace Aegir;
+
+[BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+public class Plugin : BaseUnityPlugin
 {
-    [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
-    public class Plugin : BaseUnityPlugin
+    private readonly Harmony _harmony = new(MyPluginInfo.PLUGIN_GUID);
+
+    internal new static ManualLogSource Logger;
+
+    private void Awake()
     {
-        private readonly Harmony harmony = new(PluginInfo.PLUGIN_GUID);
+        Logger = base.Logger;
 
-        internal static new ManualLogSource Logger;
-
-        private void Awake()
-        {
-            Logger = base.Logger;
-
-            harmony.PatchAll();
-            Logger.LogMessage($"Plugin is loaded!");
-        }
+        _harmony.PatchAll();
+        Logger.LogMessage($"Plugin is loaded!");
     }
 }

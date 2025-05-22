@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0 - 2025-05-22
+
+### Changed
+
+- Bumped to game version 0.220.4
+
 ## 1.1.0 - 2023-11-09
 
 ### Added
