@@ -17,7 +17,7 @@ class Build : NukeBuild
     public static int Main () => Execute<Build>(x => x.Compile);
 
     [Parameter("Configuration to build, default is 'Debug'")]
-    readonly Configuration BuildConfig = Configuration.Debug;
+    readonly Configuration BuildConfig = Configuration.Release;
 
     [Solution(GenerateProjects = true)]
     readonly Solution Solution;
