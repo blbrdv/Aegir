@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
     <AssemblyName>Aegir</AssemblyName>
-    <Product>Aegit plugin for Valheim</Product>
+    <Product>Aegir</Product>
     <Description>Simple mod for disabling water camera clipping</Description>
     <Version>1.1.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
