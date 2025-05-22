@@ -19,7 +19,7 @@ In singleplayer:
     5. Press "Z" to enter fly mode
     6. Enjoy
 
-In multyplayer:
+In multiplayer:
 
 Download and install any mod that allow to turn on `Developer mod` on server.
 
