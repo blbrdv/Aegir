@@ -21,14 +21,11 @@ In singleplayer:
 
 In multyplayer:
 
-For using this mod in multiplayer - see Quality of Life mod 
-https://www.nexusmods.com/valheim/mods/104
+Download and install any mod that allow to turn on `Developer mod` on server.
 
-    1. Open menu (F3)
-    2. Turn on `Developer mode`
-    3. Close menu
-    4. Press `Z` to enter fly mode
-    5. Enjoy
+    1. Turn on `Developer mode`
+    2. Press `Z` to enter fly mode
+    3. Enjoy
 
 -------------------------------------------------------------------------------
                                 Links
