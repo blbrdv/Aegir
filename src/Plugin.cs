@@ -8,14 +8,14 @@ namespace Aegir;
 public class Plugin : BaseUnityPlugin
 {
     private readonly Harmony _harmony = new(MyPluginInfo.PLUGIN_GUID);
-
+    
     internal new static ManualLogSource Logger;
-
+    
     private void Awake()
     {
         Logger = base.Logger;
-
+        
         _harmony.PatchAll();
-        Logger.LogMessage($"Plugin is loaded!");
+        Logger.LogMessage("Plugin is loaded!");
     }
 }
