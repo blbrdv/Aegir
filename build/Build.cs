@@ -26,6 +26,8 @@ class Build : NukeBuild
 
     readonly Section GamePaths = Cfg.LoadFromFile("build.cfg")["Paths"];
     
+    readonly Encoding UTF8NoBOM = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+    
     Project AegirProject => Solution.Aegir; // just ignore CS1061, it's fine
     string ProjectTargetFramework => AegirProject.GetTargetFrameworks()!.First();
     AbsolutePath MainChangelog => RootDirectory / "CHANGELOG.md";
@@ -126,7 +128,7 @@ class Build : NukeBuild
             
             NexusModsChangelog
                 .TouchFile()
-                .WriteAllLines(changelog, Encoding.UTF8);
+                .WriteAllLines(changelog, UTF8NoBOM);
             
             ArchiveDirectory.CreateOrCleanDirectory();
 
@@ -154,7 +156,7 @@ class Build : NukeBuild
 
             ThunderStoreChangelog
                 .TouchFile()
-                .WriteAllLines(changelog, Encoding.UTF8);
+                .WriteAllLines(changelog, UTF8NoBOM);
             
             ArchiveDirectory.CreateOrCleanDirectory();
 
