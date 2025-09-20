@@ -69,3 +69,5 @@ _temp
 
 # build config
 build.cfg
+
+dist/**/CHANGELOG.*

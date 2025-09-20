@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.IO;
+using System.Text;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
@@ -27,13 +28,16 @@ class Build : NukeBuild
     
     Project AegirProject => Solution.Aegir; // just ignore CS1061, it's fine
     string ProjectTargetFramework => AegirProject.GetTargetFrameworks()!.First();
+    AbsolutePath MainChangelog => RootDirectory / "CHANGELOG.md";
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath OutputDirectory => RootDirectory / "output";
     AbsolutePath NexusModsOutputDirectory => OutputDirectory / "NexusMods";
     AbsolutePath ThunderStoreOutputDirectory => OutputDirectory / "ThunderStore";
     AbsolutePath ArchiveDirectory => RootDirectory / "_tmp";
     AbsolutePath NexusModsDistDirectory => RootDirectory / "dist" / "NexusMods";
+    AbsolutePath NexusModsChangelog => NexusModsDistDirectory / "CHANGELOG.txt";
     AbsolutePath ThunderStoreDistDirectory => RootDirectory / "dist" / "ThunderStore";
+    AbsolutePath ThunderStoreChangelog => ThunderStoreDistDirectory / "CHANGELOG.md";
     AbsolutePath GameDirectory => AbsolutePath.Create(GamePaths["game"].StringValue);
     AbsolutePath PluginsDirectory => 
         AbsolutePath.Create(Path.Combine(GameDirectory, GamePaths["bepinex"].StringValue));
@@ -106,6 +110,24 @@ class Build : NukeBuild
         .DependsOn(Compile)
         .Executes(() =>
         {
+            var changelog = new []
+                {
+                    "-------------------------------------------------------------------------------",
+                    "                                Changelog",
+                    "-------------------------------------------------------------------------------"
+                }
+                .Concat(
+                    MainChangelog.ReadAllLines()[1..]
+                        .TakeUntil(line => line.StartsWith('['))
+                        .Select(line => line.TrimStart('#', ' '))
+                )
+                .Select(line => line.Replace("[", "").Replace("]", ""))
+                .SkipLast(2);
+            
+            NexusModsChangelog
+                .TouchFile()
+                .WriteAllLines(changelog, Encoding.UTF8);
+            
             ArchiveDirectory.CreateOrCleanDirectory();
 
             CompiledFilePath.CopyToDirectory(ArchiveDirectory);
@@ -113,8 +135,10 @@ class Build : NukeBuild
             NexusModsDistDirectory
                 .GetFiles()
                 .ForEach(file => file.CopyToDirectory(NexusModsOutputDirectory));
-
+            
+            NexusModsChangelog.DeleteFile();
             ArchiveDirectory.DeleteDirectory();
+            
             Log.Information("Packed files to {Target}", NexusModsOutputDirectory);
         });
 
@@ -123,13 +147,24 @@ class Build : NukeBuild
         .DependsOn(Compile)
         .Executes(() =>
         {
+            var changelog = MainChangelog.ReadAllLines()
+                .TakeUntil(line => line.StartsWith('['))
+                .Select(line => line.Replace("[", "").Replace("]", ""))
+                .SkipLast(2);
+
+            ThunderStoreChangelog
+                .TouchFile()
+                .WriteAllLines(changelog, Encoding.UTF8);
+            
             ArchiveDirectory.CreateOrCleanDirectory();
 
             CompiledFilePath.CopyToDirectory(ArchiveDirectory);
             ThunderStoreDistDirectory.GetFiles().ForEach(file => file.CopyToDirectory(ArchiveDirectory));
             ArchiveDirectory.ZipTo(ThunderStoreOutputDirectory / PackedFileName);
-
+            
+            ThunderStoreChangelog.DeleteFile();
             ArchiveDirectory.DeleteDirectory();
+            
             Log.Information("Packed files to {Target}", ThunderStoreOutputDirectory);
         });
 
