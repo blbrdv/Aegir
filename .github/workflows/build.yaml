@@ -38,7 +38,7 @@ jobs:
         id: ref
         run: |
           if ( "true" -eq "${{ inputs.target-ref == '' }}" ) {
-            $Ref = "main";
+            $Ref = "${{ env.GITHUB_REF }}";
           } else {
             $Ref = "${{ inputs.target-ref }}"
           }
