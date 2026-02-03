@@ -67,7 +67,7 @@ jobs:
         
       - name: Download game
         id: download
-        run: steamcmd +login anonymous +app_update 896660 -beta public validate +quit
+        run: steamcmd +@sSteamCmdForcePlatformType windows +login anonymous +app_update 896660 -beta public validate +quit
       
       - name: Upload logs
         if: always() && steps.download.conclusion == 'failure'
