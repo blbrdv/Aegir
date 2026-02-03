@@ -45,10 +45,6 @@ This simple mod removes water camera clipping in fly-mode, allowing players to d
     - Download and install from [Microsoft](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
 - Nuke tool installed
     - Run `dotnet tool restore` in solution root directory.
-- Correct path to game directory in config
-    1. Create `build.cgf` in solution root directory
-    2. Copy everything from `build.example.cfg` to `build.cfg`
-    3. Update paths if needed
 
 ### Build steps
 

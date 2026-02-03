@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Text;
@@ -9,8 +10,6 @@ using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Utilities.Collections;
 using Serilog;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using SharpConfig;
-using Cfg = SharpConfig.Configuration;
 // ReSharper disable AllUnderscoreLocalParameterName
 // ReSharper disable UnusedMember.Local
 
@@ -21,10 +20,14 @@ class Build : NukeBuild
     [Parameter("Configuration to build, default is 'Debug'")]
     readonly Configuration BuildConfig = Configuration.Release;
 
+    [Parameter("Path to the root of game folder")]
+    readonly string GamePath;
+
+    [Parameter("Path to the Bepenix plugin folder, default is 'BepInEx\\plugins'")]
+    readonly string BepenixPath = @"BepInEx\plugins";
+
     [Solution(GenerateProjects = true)]
     readonly Solution Solution;
-
-    readonly Section GamePaths = Cfg.LoadFromFile("build.cfg")["Paths"];
     
     readonly Encoding UTF8NoBOM = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
     
@@ -40,9 +43,8 @@ class Build : NukeBuild
     AbsolutePath NexusModsChangelog => NexusModsDistDirectory / "CHANGELOG.txt";
     AbsolutePath ThunderStoreDistDirectory => RootDirectory / "dist" / "ThunderStore";
     AbsolutePath ThunderStoreChangelog => ThunderStoreDistDirectory / "CHANGELOG.md";
-    AbsolutePath GameDirectory => AbsolutePath.Create(GamePaths["game"].StringValue);
     AbsolutePath PluginsDirectory => 
-        AbsolutePath.Create(Path.Combine(GameDirectory, GamePaths["bepinex"].StringValue));
+        AbsolutePath.Create(Path.Combine(GamePath, BepenixPath));
     AbsolutePath BuildDirectory => SourceDirectory / "bin" / BuildConfig / ProjectTargetFramework;
     string CompiledFileName => AegirProject.Name + ".dll";
     AbsolutePath CompiledFilePath => BuildDirectory / CompiledFileName;
@@ -72,9 +74,6 @@ class Build : NukeBuild
         .After(Clean)
         .Executes(() =>
         {
-            Environment.SetEnvironmentVariable("GAME_PATH", GameDirectory);
-            Log.Debug("Env GAME_PATH set to {Path}", GameDirectory);
-
             DotNetRestore(s => s
                 .SetProjectFile(Solution));
         });
@@ -82,18 +81,17 @@ class Build : NukeBuild
     /// <summary>Build project</summary>
     Target Compile => _ => _
         .Requires(() => BuildConfig)
+        .Requires(() => GamePath)
         .Before(PackForNexusmods)
         .Before(PackForThunderstore)
         .After(Restore)
         .Executes(() =>
         {
-            Environment.SetEnvironmentVariable("GAME_PATH", GameDirectory);
-            Log.Debug("Env GAME_PATH set to {Path}", GameDirectory);
-
             DotNetBuild(s => s
-                .SetProjectFile(Solution)
-                .SetConfiguration(BuildConfig)
-                .EnableNoRestore());
+                    .SetProjectFile(Solution)
+                    .SetConfiguration(BuildConfig)
+                    .AddProperty("GamePath", GamePath)
+                    .EnableNoRestore());
         });
 
     /// <summary>Copy compiled file to game plugins directory</summary>

@@ -16,12 +16,6 @@
     </RestoreAdditionalProjectSources>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <ToolsPath Condition=" '$(GAME_PATH)' == '' ">
-        C:\Program Files (x86)\Steam\steamapps\common\Valheim
-    </ToolsPath>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="BepInEx.Analyzers" Version="1.0.8" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.4.21" />
@@ -35,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="$(GAME_PATH)\valheim_Data\Managed\*.dll" />
+    <Reference Include="$(GamePath)\valheim_Data\Managed\*.dll" />
   </ItemGroup>
 
 </Project>

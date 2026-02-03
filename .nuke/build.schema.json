@@ -104,6 +104,10 @@
   "allOf": [
     {
       "properties": {
+        "BepenixPath": {
+          "type": "string",
+          "description": "Path to the Bepenix plugin folder, default is 'BepInEx\\plugins'"
+        },
         "BuildConfig": {
           "type": "string",
           "description": "Configuration to build, default is 'Debug'",
@@ -111,6 +115,10 @@
             "Debug",
             "Release"
           ]
+        },
+        "GamePath": {
+          "type": "string",
+          "description": "Path to the root of game folder"
         },
         "Solution": {
           "type": "string",
