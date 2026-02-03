@@ -73,7 +73,7 @@ jobs:
         if: steps.download.conclusion == 'failure'
         uses: actions/upload-artifact
         with:
-          name: downloading-logs-${{ GITHUB_SHA }}
+          name: downloading-logs-${{ env.GITHUB_SHA }}
           path: ${{ steps.steamcmd.outputs.directory }}/logs/
           compression-level: 0
           if-no-files-found: error
