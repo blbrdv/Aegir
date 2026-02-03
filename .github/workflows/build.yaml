@@ -108,7 +108,7 @@ jobs:
         run: .\run.ps1 compile --game-path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ env.GAME_NAME }}"
       
       - name: Test
-        run: ls ${{ github.workspace }}/src/bin
+        run: ls ${{ github.workspace }}\src
       
       - name: Upload build
         uses: actions/upload-artifact@v6
