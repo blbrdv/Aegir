@@ -74,7 +74,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             DotNetRestore(s => s
-                .SetProjectFile(Solution));
+                .SetProjectFile(AegirProject));
         });
 
     /// <summary>Build project</summary>
@@ -87,7 +87,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             DotNetBuild(s => s
-                .SetProjectFile(Solution)
+                .SetProjectFile(AegirProject)
                 .SetConfiguration(BuildConfig)
                 .AddProperty("GamePath", GamePath)
                 .EnableNoRestore());

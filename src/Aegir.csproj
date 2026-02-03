@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk" DefaultTargets="main">
+<Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Build">
 
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
@@ -58,7 +58,7 @@
     </Otherwise>
   </Choose>
 
-  <Target Name="main">
+  <Target Name="ReferenceGameFiles" BeforeTargets="PrepareForBuild">
     <Error Condition="'$(ReferencePath)' == ''" Text="Folder '$(GamePath)' is not game root or does not exists."/>
     <ItemGroup>
       <Reference Include="$(ReferencePath)"/>
