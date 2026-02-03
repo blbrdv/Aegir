@@ -66,7 +66,7 @@ jobs:
         uses: CyberAndrii/setup-steamcmd@v1
         
       - name: Download game
-        run: steamcmd +login anonymous +app_update 896660 validate +quit
+        run: steamcmd +login anonymous +app_update 896660 -beta public validate +quit
 
       - name: Restore project
         run: .\run.ps1 restore
