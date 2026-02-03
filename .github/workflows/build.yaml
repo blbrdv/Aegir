@@ -58,7 +58,7 @@ jobs:
           global-json-file: global.json
       
       - name: Restore build
-        run: dotnet restore --project "build\_build.csproj"
+        run: dotnet restore "build\_build.csproj"
 
       - uses: RageAgainstThePixel/setup-steamcmd@v1
         
