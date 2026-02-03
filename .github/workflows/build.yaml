@@ -62,7 +62,8 @@ jobs:
       - name: Restore build
         run: dotnet restore "build\_build.csproj"
 
-      - uses: RageAgainstThePixel/setup-steamcmd@v1
+      - id: steamcmd
+        uses: CyberAndrii/setup-steamcmd@v1
         
       - name: Download game
         run: steamcmd +login anonymous +app_update 896660 validate +quit
@@ -71,4 +72,4 @@ jobs:
         run: .\run.ps1 restore
 
       - name: Build project
-        run: .\run.ps1 compile --game-path "${{ env.STEAM_DIR }}\Valheim dedicated server"
+        run: .\run.ps1 compile --game-path "${{ steps.steamcmd-selector.outputs.directory }}\steamapps\common\Valheim dedicated server"
