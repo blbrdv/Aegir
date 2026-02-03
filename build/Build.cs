@@ -23,8 +23,8 @@ class Build : NukeBuild
     [Parameter("Path to the root of game folder")]
     readonly string GamePath;
 
-    [Parameter("Path to the Bepenix plugin folder, default is 'BepInEx\\plugins'")]
-    readonly string BepenixPath = @"BepInEx\plugins";
+    [Parameter("Path to the BepInEx plugin folder, default is 'BepInEx\\plugins'")]
+    readonly string BepinexPath = @"BepInEx\plugins";
 
     [Solution(GenerateProjects = true)]
     readonly Solution Solution;
@@ -44,7 +44,7 @@ class Build : NukeBuild
     AbsolutePath ThunderStoreDistDirectory => RootDirectory / "dist" / "ThunderStore";
     AbsolutePath ThunderStoreChangelog => ThunderStoreDistDirectory / "CHANGELOG.md";
     AbsolutePath PluginsDirectory => 
-        AbsolutePath.Create(Path.Combine(GamePath, BepenixPath));
+        AbsolutePath.Create(Path.Combine(GamePath, BepinexPath));
     AbsolutePath BuildDirectory => SourceDirectory / "bin" / BuildConfig / ProjectTargetFramework;
     string CompiledFileName => AegirProject.Name + ".dll";
     AbsolutePath CompiledFilePath => BuildDirectory / CompiledFileName;
