@@ -23,6 +23,7 @@ on:
 env:
   GAME_ID: 896660
   GAME_NAME: Valheim dedicated server
+  ContinuousIntegrationBuild: true
 
 jobs:
   target:
