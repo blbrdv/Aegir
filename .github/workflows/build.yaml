@@ -5,7 +5,7 @@ on:
     inputs:
       target-ref:
         description: The branch, tag or SHA to checkout.
-          type: string
+        type: string
           
   pull_request:
     branches:
