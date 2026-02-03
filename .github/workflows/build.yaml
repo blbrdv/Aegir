@@ -20,6 +20,10 @@ on:
       - 'run.*'
       - 'global.json'
 
+env:
+  GAME_ID: 896660
+  GAME_NAME: Valheim Dedicated server
+
 jobs:
   target:
     name: Set target
@@ -64,16 +68,29 @@ jobs:
 
       - id: steamcmd
         uses: CyberAndrii/setup-steamcmd@v1
+      
+      - run: |
+          $Manifest = @'
+            "AppState"
+            {
+              "appid"		"${{ GAME_ID }}"
+              "Universe"		"1"
+              "installdir"		"${{ GAME_NAME }}"
+              "StateFlags"		"1024"
+            }
+          '@
+          
+          $Manifest -f 'string' | Out-File "${{ steps.steamcmd.outputs.directory }}\steamapps\appmanifest_${{ GAME_ID }}.acf"
         
       - name: Download game
         id: download
-        run: steamcmd +@sSteamCmdForcePlatformType windows +login anonymous +app_update 896660 -beta public validate +quit
+        run: steamcmd +@sSteamCmdForcePlatformType windows +login anonymous +app_update ${{ GAME_ID }} -beta public validate +quit
       
       - name: Upload logs
         if: always() && steps.download.conclusion == 'failure'
         uses: actions/upload-artifact@v6
         with:
-          name: downloading-logs-${{ env.GITHUB_RUN_ID }}-${{ env.GITHUB_RUN_ATTEMPT }}
+          name: downloading-logs
           path: ${{ steps.steamcmd.outputs.directory }}/logs/
           compression-level: 0
           retention-days: 7
@@ -83,4 +100,4 @@ jobs:
         run: .\run.ps1 restore
 
       - name: Build project
-        run: .\run.ps1 compile --game-path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\Valheim dedicated server"
+        run: .\run.ps1 compile --game-path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ GAME_NAME }}"
