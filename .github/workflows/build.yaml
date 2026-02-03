@@ -70,7 +70,7 @@ jobs:
         uses: CyberAndrii/setup-steamcmd@v1
       
       - run: |
-          New-Item -ItemType Directory -Force -Path "${{ steps.steamcmd.outputs.directory }}\steamapps"
+          New-Item -ItemType Directory -Force -Path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ env.GAME_NAME }}"
           $Manifest = @'
             "AppState"
             {
