@@ -46,11 +46,11 @@ This simple mod removes water camera clipping in fly-mode, allowing players to d
 - Nuke tool installed
     - Run `dotnet tool restore` in solution root directory.
 
-### Build steps
+### CI/CD
 
-1. Run `./build.sh Compile` (or `.\build.ps1 ...` for Windows)
+1. Run `./run.sh Compile --game-path <game root folder>` (or `.\run.ps1 ...` for Windows)
 
-For more commands see [Build.cs](build/Build.cs) file or run build with `--help` flag.
+For more commands see [Build.cs](build/Build.cs) file or run script with `--help` flag.
 
 ### FAQ
 
