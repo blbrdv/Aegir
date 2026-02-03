@@ -71,16 +71,16 @@ jobs:
       
       - run: |
           $Manifest = @'
-            `"AppState`"
+            "AppState"
             {
-              `"appid`" `"${{ env.GAME_ID }}`"
-              `"Universe`" `"1`"
-              `"installdir`" `"${{ env.GAME_NAME }}`"
-              `"StateFlags`" `"66`"
+              "appid" "${{ env.GAME_ID }}"
+              "Universe" "1"
+              "installdir" "${{ env.GAME_NAME }}"
+              "StateFlags" "66"
             }
           '@
           
-          $Manifest -f 'string' | Out-File "${{ steps.steamcmd.outputs.directory }}\steamapps\appmanifest_${{ env.GAME_ID }}.acf"
+          $Manifest | Out-File "${{ steps.steamcmd.outputs.directory }}\steamapps\appmanifest_${{ env.GAME_ID }}.acf"
         
       - name: Download game
         id: download
