@@ -66,10 +66,13 @@ jobs:
       - name: Restore build
         run: dotnet restore "build\_build.csproj"
 
-      - id: steamcmd
+      - name: Install SteamCMD
+        id: steamcmd
         uses: CyberAndrii/setup-steamcmd@v1
       
-      - run: |
+      # Little hack to let Steam think that we own this game
+      - name: Create Steam manifest file
+        run: |
           New-Item -ItemType Directory -Force -Path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ env.GAME_NAME }}"
           $Manifest = @'
             "AppState"
@@ -77,7 +80,7 @@ jobs:
               "appid" "${{ env.GAME_ID }}"
               "Universe" "1"
               "installdir" "${{ env.GAME_NAME }}"
-              "StateFlags" "1024"
+              "StateFlags" "6"
             }
           '@
           
@@ -85,8 +88,9 @@ jobs:
         
       - name: Download game
         id: download
-        run: steamcmd +@sSteamCmdForcePlatformType windows +login anonymous +app_update ${{ env.GAME_ID }} -beta public validate +quit
+        run: steamcmd +login anonymous +app_update ${{ env.GAME_ID }} validate +quit
       
+      # Upload SteamCMD logs to workflow artefacts if downloading game failed
       - name: Upload logs
         if: always() && steps.download.conclusion == 'failure'
         uses: actions/upload-artifact@v6
