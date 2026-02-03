@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk" DefaultTargets="main">
 
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
@@ -28,8 +28,41 @@
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="$(GamePath)\valheim_Data\Managed\*.dll" />
-  </ItemGroup>
+  <Choose>
+    <When Condition="Exists('$(GamePath)')">
+      <Choose>
+        <When Condition="Exists('$(GamePath)\valheim_Data')">
+          <PropertyGroup>
+            <ReferencePath>$(GamePath)\valheim_Data\Managed\*.dll</ReferencePath>
+          </PropertyGroup>
+        </When>
+        
+        <When Condition="Exists('$(GamePath)\valheim_server_Data')">
+          <PropertyGroup>
+            <ReferencePath>$(GamePath)\valheim_server_Data\Managed\*.dll</ReferencePath>
+          </PropertyGroup>
+        </When>
+
+        <Otherwise>
+          <PropertyGroup>
+            <ReferencePath/>
+          </PropertyGroup>
+        </Otherwise>
+      </Choose>
+    </When>
+
+    <Otherwise>
+      <PropertyGroup>
+        <ReferencePath/>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <Target Name="main">
+    <Error Condition="'$(ReferencePath)' == ''" Text="Folder '$(GamePath)' is not game root or does not exists."/>
+    <ItemGroup>
+      <Reference Include="$(ReferencePath)"/>
+    </ItemGroup>
+  </Target>
 
 </Project>
