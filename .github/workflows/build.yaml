@@ -107,19 +107,11 @@ jobs:
       - name: Build project
         run: .\run.ps1 compile --game-path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ env.GAME_NAME }}"
       
-      - name: Test
-        run: |
-          ls ${{ github.workspace }}
-          ls ${{ github.workspace }}/src
-          ls ${{ github.workspace }}/src/obj
-          ls ${{ github.workspace }}/src/obj/Release
-          ls ${{ github.workspace }}/src/obj/Release/net46
-      
       - name: Upload build
         uses: actions/upload-artifact@v6
         with:
           name: plugin-${{ github.sha }}
-          path: ${{ github.workspace }}/src/obj/Release/net46/Aegir.dll
+          path: ${{ github.workspace }}/src/bin/Release/net46/Aegir.dll
           compression-level: 0
           retention-days: 1
           if-no-files-found: error
