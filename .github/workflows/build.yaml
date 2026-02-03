@@ -77,7 +77,7 @@ jobs:
               "appid" "${{ env.GAME_ID }}"
               "Universe" "1"
               "installdir" "${{ env.GAME_NAME }}"
-              "StateFlags" "4"
+              "StateFlags" "1024"
             }
           '@
           
