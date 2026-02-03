@@ -104,9 +104,9 @@
   "allOf": [
     {
       "properties": {
-        "BepenixPath": {
+        "BepinexPath": {
           "type": "string",
-          "description": "Path to the Bepenix plugin folder, default is 'BepInEx\\plugins'"
+          "description": "Path to the BepInEx plugin folder, default is 'BepInEx\\plugins'"
         },
         "BuildConfig": {
           "type": "string",
