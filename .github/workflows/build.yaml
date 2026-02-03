@@ -71,12 +71,12 @@ jobs:
       
       - run: |
           $Manifest = @'
-            "AppState"
+            `"AppState`"
             {
-              "appid" "${{ env.GAME_ID }}"
-              "Universe" "1"
-              "installdir" "${{ env.GAME_NAME }}"
-              "StateFlags" "1024"
+              `"appid`" `"${{ env.GAME_ID }}`"
+              `"Universe`" `"1`"
+              `"installdir`" `"${{ env.GAME_NAME }}`"
+              `"StateFlags`" `"66`"
             }
           '@
           
