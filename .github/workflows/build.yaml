@@ -38,7 +38,7 @@ jobs:
         id: ref
         run: |
           if ( "true" -eq "${{ inputs.target-ref == '' }}" ) {
-            $Ref = "${{ env.GITHUB_REF }}";
+            $Ref = "${{ github.ref }}";
           } else {
             $Ref = "${{ inputs.target-ref }}"
           }
@@ -73,7 +73,7 @@ jobs:
       # Little hack to let Steam think that we own this game
       - name: Create Steam manifest file
         run: |
-          New-Item -ItemType Directory -Force -Path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ env.GAME_NAME }}"
+          New-Item -ItemType Directory -Force -Path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ env.GAME_NAME }}" -Verbose:$false
           $Manifest = @'
             "AppState"
             {
@@ -102,9 +102,16 @@ jobs:
           if-no-files-found: error
 
       - name: Restore project
-        run: |
-          ls
-          .\run.ps1 restore
+        run: .\run.ps1 restore
 
       - name: Build project
         run: .\run.ps1 compile --game-path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ env.GAME_NAME }}"
+        
+      - name: Upload build
+        uses: actions/upload-artifact@v6
+        with:
+          name: plugin
+          path: src/bin/Release/net46/Aegir.dll
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
