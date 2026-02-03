@@ -66,10 +66,20 @@ jobs:
         uses: CyberAndrii/setup-steamcmd@v1
         
       - name: Download game
+        id: download
         run: steamcmd +login anonymous +app_update 896660 -beta public validate +quit
+      
+      - name: Upload logs
+        if: steps.download.conclusion == 'failure'
+        uses: actions/upload-artifact
+        with:
+          name: downloading-logs-${{ GITHUB_SHA }}
+          path: ${{ steps.steamcmd.outputs.directory }}/logs/
+          compression-level: 0
+          if-no-files-found: error
 
       - name: Restore project
         run: .\run.ps1 restore
 
       - name: Build project
-        run: .\run.ps1 compile --game-path "${{ steps.steamcmd-selector.outputs.directory }}\steamapps\common\Valheim dedicated server"
+        run: .\run.ps1 compile --game-path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\Valheim dedicated server"
