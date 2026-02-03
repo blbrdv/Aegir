@@ -71,7 +71,7 @@ jobs:
       
       - name: Upload logs
         if: steps.download.conclusion == 'failure'
-        uses: actions/upload-artifact
+        uses: actions/upload-artifact@v6
         with:
           name: downloading-logs-${{ env.GITHUB_SHA }}
           path: ${{ steps.steamcmd.outputs.directory }}/logs/
