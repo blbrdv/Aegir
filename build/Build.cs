@@ -69,7 +69,7 @@ class Build : NukeBuild
     Target Restore => _ => _
         .Requires(() => BuildConfig)
         .Before(Compile)
-        .DependsOn(Clean)
+        .After(Clean)
         .Executes(() =>
         {
             Environment.SetEnvironmentVariable("GAME_PATH", GameDirectory);
@@ -84,7 +84,7 @@ class Build : NukeBuild
         .Requires(() => BuildConfig)
         .Before(PackForNexusmods)
         .Before(PackForThunderstore)
-        .DependsOn(Restore)
+        .After(Restore)
         .Executes(() =>
         {
             Environment.SetEnvironmentVariable("GAME_PATH", GameDirectory);
@@ -98,7 +98,7 @@ class Build : NukeBuild
 
     /// <summary>Copy compiled file to game plugins directory</summary>
     Target Install => _ => _
-        .DependsOn(Compile)
+        .After(Compile)
         .Executes(() => {
             CompiledPluginPath.DeleteFile();
             Log.Information("Deleting {Path}", CompiledPluginPath);
@@ -109,7 +109,7 @@ class Build : NukeBuild
 
     /// <summary>Pack compiled and other necessary files to zip for NexusMods in output directory</summary>
     Target PackForNexusmods => _ => _
-        .DependsOn(Compile)
+        .After(Compile)
         .Executes(() =>
         {
             var changelog = new []
@@ -146,7 +146,7 @@ class Build : NukeBuild
 
     /// <summary>Pack compiled and other necessary files to zip for ThunderStore in output directory</summary>
     Target PackForThunderstore => _ => _
-        .DependsOn(Compile)
+        .After(Compile)
         .Executes(() =>
         {
             var changelog = MainChangelog.ReadAllLines()
@@ -172,8 +172,8 @@ class Build : NukeBuild
 
     /// <summary>Pack compiled and other necessary files to zip in output directory</summary>
     Target Pack => _ => _
-        .DependsOn(PackForNexusmods)
-        .DependsOn(PackForThunderstore)
+        .After(PackForNexusmods)
+        .After(PackForThunderstore)
         .Executes(() =>
         {
             Log.Information("Packed files to {Target}", OutputDirectory);
