@@ -73,18 +73,18 @@ jobs:
           $Manifest = @'
             "AppState"
             {
-              "appid"		"${{ GAME_ID }}"
+              "appid"		"${{ env.GAME_ID }}"
               "Universe"		"1"
-              "installdir"		"${{ GAME_NAME }}"
+              "installdir"		"${{ env.GAME_NAME }}"
               "StateFlags"		"1024"
             }
           '@
           
-          $Manifest -f 'string' | Out-File "${{ steps.steamcmd.outputs.directory }}\steamapps\appmanifest_${{ GAME_ID }}.acf"
+          $Manifest -f 'string' | Out-File "${{ steps.steamcmd.outputs.directory }}\steamapps\appmanifest_${{ env.GAME_ID }}.acf"
         
       - name: Download game
         id: download
-        run: steamcmd +@sSteamCmdForcePlatformType windows +login anonymous +app_update ${{ GAME_ID }} -beta public validate +quit
+        run: steamcmd +@sSteamCmdForcePlatformType windows +login anonymous +app_update ${{ env.GAME_ID }} -beta public validate +quit
       
       - name: Upload logs
         if: always() && steps.download.conclusion == 'failure'
@@ -100,4 +100,4 @@ jobs:
         run: .\run.ps1 restore
 
       - name: Build project
-        run: .\run.ps1 compile --game-path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ GAME_NAME }}"
+        run: .\run.ps1 compile --game-path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ env.GAME_NAME }}"
