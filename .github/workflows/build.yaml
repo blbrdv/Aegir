@@ -70,7 +70,7 @@ jobs:
         run: steamcmd +login anonymous +app_update 896660 -beta public validate +quit
       
       - name: Upload logs
-        if: steps.download.conclusion == 'failure'
+        if: always() && steps.download.conclusion == 'failure'
         uses: actions/upload-artifact@v6
         with:
           name: downloading-logs-${{ env.GITHUB_SHA }}
