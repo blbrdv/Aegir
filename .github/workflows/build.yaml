@@ -22,7 +22,7 @@ on:
 
 env:
   GAME_ID: 896660
-  GAME_NAME: Valheim Dedicated server
+  GAME_NAME: Valheim dedicated server
 
 jobs:
   target:
@@ -73,10 +73,10 @@ jobs:
           $Manifest = @'
             "AppState"
             {
-              "appid"		"${{ env.GAME_ID }}"
-              "Universe"		"1"
-              "installdir"		"${{ env.GAME_NAME }}"
-              "StateFlags"		"1024"
+              "appid" "${{ env.GAME_ID }}"
+              "Universe" "1"
+              "installdir" "${{ env.GAME_NAME }}"
+              "StateFlags" "1024"
             }
           '@
           
