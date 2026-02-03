@@ -1,0 +1,72 @@
+name: Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      target-ref:
+        description: The branch, tag or SHA to checkout.
+          type: string
+          
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - '.github/workflows/build.yaml'
+      - '.nuke/**'
+      - 'build/**'
+      - 'dist/**'
+      - 'src/**'
+      - 'Aegir.sln'
+      - 'run.*'
+      - 'global.json'
+
+jobs:
+  target:
+    name: Set target
+    
+    runs-on: windows-latest
+
+    outputs:
+      target-ref: ${{ steps.ref.outputs.target-ref }}
+
+    steps:
+      - name: Setting target ref
+        id: ref
+        run: |
+          if ( "true" -eq "${{ inputs.target-ref == '' }}" ) {
+            $Ref = "main";
+          } else {
+            $Ref = "${{ inputs.target-ref }}"
+          }
+          echo "Ref is '$Ref'";
+          echo "target-ref=$Ref" >> $env:GITHUB_OUTPUT;
+          
+  build:
+    runs-on: windows-latest
+
+    name: Test build
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          repository: 'blbrdv/Aegir'
+          ref: ${{ needs.target.outputs.target-ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      
+      - name: Restore build
+        run: dotnet restore --project "build\_build.csproj"
+
+      - uses: RageAgainstThePixel/setup-steamcmd@v1
+        
+      - name: Download game
+        run: steamcmd +login anonymous +app 896660 validate +quit
+
+      - name: Restore project
+        run: .\run.ps1 restore
+
+      - name: Build project
+        run: .\run.ps1 compile --game-path "${{ env.STEAM_DIR }}\Valheim dedicated server"
