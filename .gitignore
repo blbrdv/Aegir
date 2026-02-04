@@ -64,7 +64,4 @@ nunit-*.xml
 output
 _temp
 
-# build config
-build.cfg
-
 dist/**/CHANGELOG.*

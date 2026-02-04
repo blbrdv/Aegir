@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.0] - 2026-02-03
+
+### Changed
+
+- Bumped to game version 0.221.10
+
 ## [1.3.0] - 2025-09-11
 
 ### Changed
@@ -34,6 +40,7 @@
 Initial release.
 
 
+[1.4.0]: https://github.com/blbrdv/Aegir/releases/tag/v1.4.0
 [1.3.0]: https://github.com/blbrdv/Aegir/releases/tag/v1.3.0
 [1.2.0]: https://github.com/blbrdv/Aegir/releases/tag/v1.2.0
 [1.1.0]: https://github.com/blbrdv/Aegir/releases/tag/v1.1.0

@@ -1,6 +1,5 @@
-using System;
-using System.Linq;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Nuke.Common;
 using Nuke.Common.IO;
@@ -9,25 +8,24 @@ using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Utilities.Collections;
 using Serilog;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using SharpConfig;
-using Cfg = SharpConfig.Configuration;
+
 // ReSharper disable AllUnderscoreLocalParameterName
 // ReSharper disable UnusedMember.Local
 
 class Build : NukeBuild
 {
-    public static int Main () => Execute<Build>(x => x.Compile);
+    [Parameter("Path to the BepInEx plugin folder, default is 'BepInEx\\plugins'")]
+    readonly string BepinexPath = @"BepInEx\plugins";
 
     [Parameter("Configuration to build, default is 'Debug'")]
     readonly Configuration BuildConfig = Configuration.Release;
 
-    [Solution(GenerateProjects = true)]
-    readonly Solution Solution;
+    [Parameter("Path to the root of game folder")] readonly string GamePath;
 
-    readonly Section GamePaths = Cfg.LoadFromFile("build.cfg")["Paths"];
-    
-    readonly Encoding UTF8NoBOM = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
-    
+    [Solution(GenerateProjects = true)] readonly Solution Solution;
+
+    readonly Encoding UTF8NoBom = new UTF8Encoding(false);
+
     Project AegirProject => Solution.Aegir; // just ignore CS1061, it's fine
     string ProjectTargetFramework => AegirProject.GetTargetFrameworks()!.First();
     AbsolutePath MainChangelog => RootDirectory / "CHANGELOG.md";
@@ -40,17 +38,18 @@ class Build : NukeBuild
     AbsolutePath NexusModsChangelog => NexusModsDistDirectory / "CHANGELOG.txt";
     AbsolutePath ThunderStoreDistDirectory => RootDirectory / "dist" / "ThunderStore";
     AbsolutePath ThunderStoreChangelog => ThunderStoreDistDirectory / "CHANGELOG.md";
-    AbsolutePath GameDirectory => AbsolutePath.Create(GamePaths["game"].StringValue);
-    AbsolutePath PluginsDirectory => 
-        AbsolutePath.Create(Path.Combine(GameDirectory, GamePaths["bepinex"].StringValue));
+
+    AbsolutePath PluginsDirectory =>
+        AbsolutePath.Create(Path.Combine(GamePath, BepinexPath));
+
     AbsolutePath BuildDirectory => SourceDirectory / "bin" / BuildConfig / ProjectTargetFramework;
     string CompiledFileName => AegirProject.Name + ".dll";
     AbsolutePath CompiledFilePath => BuildDirectory / CompiledFileName;
-    AbsolutePath CompiledPluginPath => PluginsDirectory / CompiledFileName; 
+    AbsolutePath CompiledPluginPath => PluginsDirectory / CompiledFileName;
     string PackedFileName => AegirProject.Name + "-" + AegirProject.GetProperty("version") + ".zip";
 
-    /// <summary>Clean build and output directories</summary>
     Target Clean => _ => _
+        .Description("Clean build and output directories")
         .Before(Restore)
         .Executes(() =>
         {
@@ -65,41 +64,38 @@ class Build : NukeBuild
             OutputDirectory.CreateOrCleanDirectory();
         });
 
-    /// <summary>Look for and download project dependencies</summary>
     Target Restore => _ => _
+        .Description("Look for and download project dependencies")
         .Requires(() => BuildConfig)
         .Before(Compile)
-        .DependsOn(Clean)
+        .After(Clean)
         .Executes(() =>
         {
-            Environment.SetEnvironmentVariable("GAME_PATH", GameDirectory);
-            Log.Debug("Env GAME_PATH set to {Path}", GameDirectory);
-
             DotNetRestore(s => s
-                .SetProjectFile(Solution));
+                .SetProjectFile(AegirProject));
         });
 
-    /// <summary>Build project</summary>
     Target Compile => _ => _
+        .Description("Build project")
         .Requires(() => BuildConfig)
+        .Requires(() => GamePath)
         .Before(PackForNexusmods)
         .Before(PackForThunderstore)
-        .DependsOn(Restore)
+        .After(Restore)
         .Executes(() =>
         {
-            Environment.SetEnvironmentVariable("GAME_PATH", GameDirectory);
-            Log.Debug("Env GAME_PATH set to {Path}", GameDirectory);
-
             DotNetBuild(s => s
-                .SetProjectFile(Solution)
+                .SetProjectFile(AegirProject)
                 .SetConfiguration(BuildConfig)
+                .AddProperty("GamePath", GamePath)
                 .EnableNoRestore());
         });
 
-    /// <summary>Copy compiled file to game plugins directory</summary>
     Target Install => _ => _
-        .DependsOn(Compile)
-        .Executes(() => {
+        .Description("Copy compiled file to game plugins directory")
+        .After(Compile)
+        .Executes(() =>
+        {
             CompiledPluginPath.DeleteFile();
             Log.Information("Deleting {Path}", CompiledPluginPath);
 
@@ -107,12 +103,12 @@ class Build : NukeBuild
             Log.Information("Plugin copied to {Target}", PluginsDirectory);
         });
 
-    /// <summary>Pack compiled and other necessary files to zip for NexusMods in output directory</summary>
     Target PackForNexusmods => _ => _
-        .DependsOn(Compile)
+        .Description("Archive compiled and other necessary files for NexusMods in output directory")
+        .After(Compile)
         .Executes(() =>
         {
-            var changelog = new []
+            var changelog = new[]
                 {
                     "-------------------------------------------------------------------------------",
                     "                                Changelog",
@@ -125,11 +121,11 @@ class Build : NukeBuild
                 )
                 .Select(line => line.Replace("[", "").Replace("]", ""))
                 .SkipLast(2);
-            
+
             NexusModsChangelog
                 .TouchFile()
-                .WriteAllLines(changelog, UTF8NoBOM);
-            
+                .WriteAllLines(changelog, UTF8NoBom);
+
             ArchiveDirectory.CreateOrCleanDirectory();
 
             CompiledFilePath.CopyToDirectory(ArchiveDirectory);
@@ -137,16 +133,16 @@ class Build : NukeBuild
             NexusModsDistDirectory
                 .GetFiles()
                 .ForEach(file => file.CopyToDirectory(NexusModsOutputDirectory));
-            
+
             NexusModsChangelog.DeleteFile();
             ArchiveDirectory.DeleteDirectory();
-            
+
             Log.Information("Packed files to {Target}", NexusModsOutputDirectory);
         });
 
-    /// <summary>Pack compiled and other necessary files to zip for ThunderStore in output directory</summary>
     Target PackForThunderstore => _ => _
-        .DependsOn(Compile)
+        .Description("Archive compiled and other necessary files for ThunderStore in output directory")
+        .After(Compile)
         .Executes(() =>
         {
             var changelog = MainChangelog.ReadAllLines()
@@ -156,26 +152,28 @@ class Build : NukeBuild
 
             ThunderStoreChangelog
                 .TouchFile()
-                .WriteAllLines(changelog, UTF8NoBOM);
-            
+                .WriteAllLines(changelog, UTF8NoBom);
+
             ArchiveDirectory.CreateOrCleanDirectory();
 
             CompiledFilePath.CopyToDirectory(ArchiveDirectory);
             ThunderStoreDistDirectory.GetFiles().ForEach(file => file.CopyToDirectory(ArchiveDirectory));
             ArchiveDirectory.ZipTo(ThunderStoreOutputDirectory / PackedFileName);
-            
+
             ThunderStoreChangelog.DeleteFile();
             ArchiveDirectory.DeleteDirectory();
-            
+
             Log.Information("Packed files to {Target}", ThunderStoreOutputDirectory);
         });
 
-    /// <summary>Pack compiled and other necessary files to zip in output directory</summary>
     Target Pack => _ => _
+        .Description("Archive compiled and other necessary files for mod stores in output directory")
         .DependsOn(PackForNexusmods)
         .DependsOn(PackForThunderstore)
         .Executes(() =>
         {
             Log.Information("Packed files to {Target}", OutputDirectory);
         });
+
+    public static int Main() => Execute<Build>(x => x.Compile);
 }

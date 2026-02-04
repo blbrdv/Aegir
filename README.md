@@ -3,7 +3,7 @@
 [![Thunderstore](https://img.shields.io/badge/-THUNDERSTORE-375a7f?style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAMAAAANIilAAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAEVQTFRFAAAAS0tLnp6eyMjIu7u7dXV1////W1tb1tbW1dXV8fHxMzMzkZGR8vLy4+Pj5OTkZmZmhISEra2turq6n5+fdHR0rKysBxBkhQAAABd0Uk5TACKm5NFm/zj59/8Kkv///1B8vdCoZbvKQGgQAAABoElEQVR4nO1W25aDIAysqyxWxFvd/f9P3UZKICGR9uyrc04fQCYTJgF6u1248Dmar7aCTuWa7yqMxrV1bq8K3+tk+4+k9R0PdbLTuGOdO2pcV+d6Nek2LumNtXaKo9YmqEljmWYy0u3NgVILjDoUfoe7ktXuM2EsUwOjjYaKff2QuXtcvdFQQRi9FEuFaYZiYMVn9nmQ/Gah0bx4hFhiBAtVMnQI8LqBtEz8cJk8XlG6kX5hp3o/Jnu+k0I42NER7usQYsQ75TZ0i/SA4M0xxxmFPB3DNTREWOyxNpNMTkGbbLKlM5g2v8SYYdni5A5WoLg9UXqhwqkbVyE+z2kiM1k7sWYnKDq/pbs7a8+s85OwFz578SJioZ918Zn150cy63zgGOoqvd4EoJ17EM412LkREMvlDuHcmJMysdy2QylvI0evNxltEgaj3eui/8GkpTKhAiyAAziB0U3x6ulvDWAMDbQeRpcvpvrIBfjDkgFWlc+8VqYIA8LjJnL1MkVAjUH8UXLfe7Oev9+SKzc1h5O56h8ohqb84za+pXvhAsMfQtwfF40Hqt0AAAAASUVORK5CYII=)](https://valheim.thunderstore.io/package/blbrdv/Aegir/)
 
 ![License](https://img.shields.io/github/license/blbrdv/Aegir?style=flat-square)
-![Valheim version](https://img.shields.io/badge/supported-v0.221.4-green?style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAMAAAANIilAAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAVZQTFRFAAAA////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////MhOoIAAAAHJ0Uk5TAAU1NiYjFQgWDjooCTs+Ej8KAhEBBC4DBoN4LxApB33/iXAlHRp/Jytx5yH0DYwYIhw4Dx4yCxTvG5Pppzc8VhMZozMqb8/1+Rc0u+At10zGHz3hLOagMQx+Ql6Oae4wyctyIOKGWSTDTTmSq4ph2Whfgk9v1wAAAuBJREFUeJzdltlD00AQxr/QNKXQllATWmwt1aJUC5SjtlYtouDRKiqI4o03nqj//4uTbDa7hZy+6feQ7M7ml9md2cwG+OeljCRUW0lNS40mxEB6bDxNt0w2p2Z82Al9kq75E4Zpd6fc5wq5onWbPllCOXvKG9YrwEzV1ukz1K7xgdmzqDo6Z84lPeE6zleFLkDlAw1tXtgXsp6wComtLqLJB5aSkn15xRNODMFYzfOBEXOGW6dbF73XnGtrgq1BrE0Hf225M+bNUkIgfEMseaHE7ZeQNXxgdJeBlAOPY4mb6y1cZsZS15eFoRdc31dgTvJZV7jR8I40U60BXD027577xvRaAKxQaK65sM6M5jquM9ONjXYAjE3y58A3sdJhSwZuMVMzF8TCoCdvc9ftEctU0JHnSw6aNUlX2ALvuPPuD3CXsa3MZjCsNhh8z9qf5S2yDFI8XHYqg1Shr/i+G7Jey3L/gPfV1WAYlMmmCxtzyugSd/wQ9UoIvN10s2p1czuG6CaCURJF1AnQI6urSO/SQ2HK5aLkmkqB2wvJFGk3jZrzOPP0mHWeILUXCjfGxYdpG9z2zkIo/HQHeOYJ90JZYAN47gAULbxgzZfIh2wRW+vC2ytqvuaOuxFY2s3Avpg3a7yJEmtLCaTyR2Gg7Ff6hrVGW/gtY96hzuGN8Fhbek/nTIW7/sDh4EIglIVIELt9hNaIATv7yqm5JvbMiLBaBj5VZaEYddboHAAlmf2M/Vo45sjKigz3MYjMyhFjs076HzPHpLaG4UJ4GRBqDobgLxNfY8Amxfaby85DC69e8ryBlgtvY3YrDqysDp3z++k4MKhcfXfYH1SAYrGQjnmq/VEKkKReR4I73v9tvlrf5TCluO73w+knYg4dxxFOiiNa7jquKXjRSp+k4gqHi4NCXBhTTfy04USMj4LLXLN/6A61mHliUlT8qv6OHy2mA+sHd6v/dzAOZjGIuT/+f/0BB3R/4s/pQgkAAAAASUVORK5CYII=)
+![Valheim version](https://img.shields.io/badge/supported-v0.221.10-green?style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAMAAAANIilAAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAVZQTFRFAAAA////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////MhOoIAAAAHJ0Uk5TAAU1NiYjFQgWDjooCTs+Ej8KAhEBBC4DBoN4LxApB33/iXAlHRp/Jytx5yH0DYwYIhw4Dx4yCxTvG5Pppzc8VhMZozMqb8/1+Rc0u+At10zGHz3hLOagMQx+Ql6Oae4wyctyIOKGWSTDTTmSq4ph2Whfgk9v1wAAAuBJREFUeJzdltlD00AQxr/QNKXQllATWmwt1aJUC5SjtlYtouDRKiqI4o03nqj//4uTbDa7hZy+6feQ7M7ml9md2cwG+OeljCRUW0lNS40mxEB6bDxNt0w2p2Z82Al9kq75E4Zpd6fc5wq5onWbPllCOXvKG9YrwEzV1ukz1K7xgdmzqDo6Z84lPeE6zleFLkDlAw1tXtgXsp6wComtLqLJB5aSkn15xRNODMFYzfOBEXOGW6dbF73XnGtrgq1BrE0Hf225M+bNUkIgfEMseaHE7ZeQNXxgdJeBlAOPY4mb6y1cZsZS15eFoRdc31dgTvJZV7jR8I40U60BXD027577xvRaAKxQaK65sM6M5jquM9ONjXYAjE3y58A3sdJhSwZuMVMzF8TCoCdvc9ftEctU0JHnSw6aNUlX2ALvuPPuD3CXsa3MZjCsNhh8z9qf5S2yDFI8XHYqg1Shr/i+G7Jey3L/gPfV1WAYlMmmCxtzyugSd/wQ9UoIvN10s2p1czuG6CaCURJF1AnQI6urSO/SQ2HK5aLkmkqB2wvJFGk3jZrzOPP0mHWeILUXCjfGxYdpG9z2zkIo/HQHeOYJ90JZYAN47gAULbxgzZfIh2wRW+vC2ytqvuaOuxFY2s3Avpg3a7yJEmtLCaTyR2Gg7Ff6hrVGW/gtY96hzuGN8Fhbek/nTIW7/sDh4EIglIVIELt9hNaIATv7yqm5JvbMiLBaBj5VZaEYddboHAAlmf2M/Vo45sjKigz3MYjMyhFjs076HzPHpLaG4UJ4GRBqDobgLxNfY8Amxfaby85DC69e8ryBlgtvY3YrDqysDp3z++k4MKhcfXfYH1SAYrGQjnmq/VEKkKReR4I73v9tvlrf5TCluO73w+knYg4dxxFOiiNa7jquKXjRSp+k4gqHi4NCXBhTTfy04USMj4LLXLN/6A61mHliUlT8qv6OHy2mA+sHd6v/dzAOZjGIuT/+f/0BB3R/4s/pQgkAAAAASUVORK5CYII=)
 
 > **Aegir** is a jötunn and a personification of the sea in Norse mythology.
 
@@ -37,24 +37,54 @@ This simple mod removes water camera clipping in fly-mode, allowing players to d
 2. Press `Z` to enter fly mode
 3. Enjoy
 
-## Build
+## Developing
 
 ### Requirements
 
 - DotNet v8.0.x installed
     - Download and install from [Microsoft](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
-- Nuke tool installed
-    - Run `dotnet tool restore` in solution root directory.
-- Correct path to game directory in config
-    1. Create `build.cgf` in solution root directory
-    2. Copy everything from `build.example.cfg` to `build.cfg`
-    3. Update paths if needed
 
-### Build steps
+### Run script
 
-1. Run `./build.sh Compile` (or `.\build.ps1 ...` for Windows)
+Run `./run.sh <target> <params...>` (or `.\run.ps1` for Windows)
 
-For more commands see [Build.cs](build/Build.cs) file or run build with `--help` flag.
+#### Usage:
+
+```
+Targets (with their direct dependencies):                                                                                                                            
+
+  Clean               
+    Clean build and output directories
+  Restore             
+    Look for and download project dependencies
+  Compile (default)   
+    Build project
+  Install             
+    Copy compiled file to game plugins directory
+  PackForNexusmods    
+    Archive compiled and other necessary files for NexusMods in output directory
+  PackForThunderstore 
+    Archive compiled and other necessary files for ThunderStore in output directory
+  Pack                 -> PackForNexusmods, PackForThunderstore
+    Archive compiled and other necessary files for mod stores in output directory
+
+Parameters:
+
+  --bepinex-path       Path to the BepInEx plugin folder, default is 'BepInEx\plugins'.
+  --build-config       Configuration to build, default is 'Debug'.
+  --game-path          Path to the root of game folder.
+
+  --continue           Indicates to continue a previously failed build attempt.
+  --help               Shows the help text for this build assembly.
+  --host               Host for execution. Default is 'automatic'.
+  --no-logo            Disables displaying the NUKE logo.
+  --plan               Shows the execution plan (HTML).
+  --profile            Defines the profiles to load.
+  --root               Root directory during build execution.
+  --skip               List of targets to be skipped. Empty list skips all dependencies.
+  --target             List of targets to be invoked. Default is 'Compile'.
+  --verbosity          Logging verbosity during build execution. Default is 'Normal'.
+```
 
 ### FAQ
 

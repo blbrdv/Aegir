@@ -9,8 +9,11 @@ charset = utf-8
 trim_trailing_whitespace = false
 insert_final_newline = true
 
-[*.{csproj,Config}]
+[*.{csproj,Config,yaml,yml,json}]
 indent_size = 2
+
+[*.{sln,cmd,ps1}]
+end_of_line = crlf
 
 [*.cs]
 dotnet_diagnostic.IDE0051.severity = none

@@ -1,0 +1,118 @@
+name: Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      target-ref:
+        description: The branch, tag or SHA to checkout.
+        type: string
+  
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - '.github/workflows/build.yaml'
+      - '.nuke/**'
+      - 'build/**'
+      - 'dist/**'
+      - 'src/**'
+      - 'Aegir.sln'
+      - 'run.*'
+      - 'global.json'
+
+env:
+  GAME_ID: 896660
+  GAME_NAME: Valheim dedicated server
+  ContinuousIntegrationBuild: true
+
+jobs:
+  target:
+    name: Set target
+    
+    runs-on: windows-latest
+
+    outputs:
+      target-ref: ${{ steps.ref.outputs.target-ref }}
+
+    steps:
+      - name: Setting target ref
+        id: ref
+        run: |
+          if ( "true" -eq "${{ inputs.target-ref == '' }}" ) {
+            $Ref = "${{ github.ref }}";
+          } else {
+            $Ref = "${{ inputs.target-ref }}"
+          }
+          echo "Ref is '$Ref'";
+          echo "target-ref=$Ref" >> $env:GITHUB_OUTPUT;
+  
+  build:
+    needs: target
+    
+    runs-on: windows-latest
+
+    name: Build
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          repository: 'blbrdv/Aegir'
+          ref: ${{ needs.target.outputs.target-ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Restore build
+        run: dotnet restore "build\_build.csproj"
+
+      - name: Install SteamCMD
+        id: steamcmd
+        uses: CyberAndrii/setup-steamcmd@v1
+      
+      # Little hack to let Steam think that we own this game
+      - name: Create Steam manifest file
+        run: |
+          New-Item -ItemType Directory -Force -Path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ env.GAME_NAME }}" -Verbose:$false
+          $Manifest = @'
+            "AppState"
+            {
+              "appid" "${{ env.GAME_ID }}"
+              "Universe" "1"
+              "installdir" "${{ env.GAME_NAME }}"
+              "StateFlags" "6"
+            }
+          '@
+          
+          $Manifest | Out-File "${{ steps.steamcmd.outputs.directory }}\steamapps\appmanifest_${{ env.GAME_ID }}.acf"
+
+      - name: Download game
+        id: download
+        run: steamcmd +login anonymous +app_update ${{ env.GAME_ID }} validate +quit
+      
+      # Upload SteamCMD logs to workflow artefacts if downloading game failed
+      - name: Upload logs
+        if: always() && steps.download.conclusion == 'failure'
+        uses: actions/upload-artifact@v6
+        with:
+          name: downloading-logs-${{ github.sha }}
+          path: ${{ steps.steamcmd.outputs.directory }}/logs/
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Restore project
+        run: .\run.ps1 restore
+
+      - name: Build project
+        run: .\run.ps1 compile --game-path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ env.GAME_NAME }}"
+
+      - name: Upload build
+        uses: actions/upload-artifact@v6
+        with:
+          name: plugin-${{ github.sha }}
+          path: ${{ github.workspace }}/src/bin/Release/net46/Aegir.dll
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error

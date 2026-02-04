@@ -1,14 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Build">
 
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
     <AssemblyName>Aegir</AssemblyName>
     <Product>Aegir</Product>
     <Description>Simple mod for disabling water camera clipping</Description>
-    <Version>1.3.0</Version>
+    <Version>1.4.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
-    <DebugType>none</DebugType>
+    <DebugType>embedded</DebugType>
     <RestoreAdditionalProjectSources>
       https://api.nuget.org/v3/index.json;
       https://nuget.bepinex.dev/v3/index.json;
@@ -16,26 +16,53 @@
     </RestoreAdditionalProjectSources>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <ToolsPath Condition=" '$(GAME_PATH)' == '' ">
-        C:\Program Files (x86)\Steam\steamapps\common\Valheim
-    </ToolsPath>
-  </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="BepInEx.Analyzers" Version="1.0.8" PrivateAssets="all" />
-    <PackageReference Include="BepInEx.Core" Version="5.4.21" />
-    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" />
-    <PackageReference Include="HarmonyX" Version="2.10.1" />
-    <PackageReference Include="UnityEngine.Modules" Version="2022.3.50" IncludeAssets="compile" />
+    <PackageReference Include="BepInEx.Analyzers" Version="1.0.8" PrivateAssets="all"/>
+    <PackageReference Include="BepInEx.Core" Version="5.4.21"/>
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0"/>
+    <PackageReference Include="HarmonyX" Version="2.10.1"/>
+    <PackageReference Include="UnityEngine.Modules" Version="2022.3.50" IncludeAssets="compile"/>
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all"/>
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="$(GAME_PATH)\valheim_Data\Managed\*.dll" />
-  </ItemGroup>
+  <Choose>
+    <When Condition="Exists('$(GamePath)')">
+      <Choose>
+        <When Condition="Exists('$(GamePath)\valheim_Data')">
+          <PropertyGroup>
+            <ReferencePath>$(GamePath)\valheim_Data\Managed\*.dll</ReferencePath>
+          </PropertyGroup>
+        </When>
+
+        <When Condition="Exists('$(GamePath)\valheim_server_Data')">
+          <PropertyGroup>
+            <ReferencePath>$(GamePath)\valheim_server_Data\Managed\*.dll</ReferencePath>
+          </PropertyGroup>
+        </When>
+
+        <Otherwise>
+          <PropertyGroup>
+            <ReferencePath/>
+          </PropertyGroup>
+        </Otherwise>
+      </Choose>
+    </When>
+
+    <Otherwise>
+      <PropertyGroup>
+        <ReferencePath/>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
+  <Target Name="ReferenceGameFiles" BeforeTargets="PrepareForBuild">
+    <Error Condition="'$(ReferencePath)' == ''" Text="Folder '$(GamePath)' is not game root or does not exists."/>
+    <ItemGroup>
+      <Reference Include="$(ReferencePath)"/>
+    </ItemGroup>
+  </Target>
 
 </Project>
