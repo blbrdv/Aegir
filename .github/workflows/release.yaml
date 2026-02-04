@@ -25,13 +25,18 @@ env:
 jobs:
   check-tag:
     runs-on: windows-latest
-    
+
     name: Check release tag existence
-    
+
+    outputs:
+      tag: ${{ steps.check.outputs.tag }}
+      version: ${{ steps.check.outputs.version }}
+
     steps:
       - uses: actions/checkout@v6
 
       - name: Checking tag
+        id: check
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -53,12 +58,12 @@ jobs:
               exit 1;
             }
           }
-  
+
   build:
     needs: check-tag
-    
+
     runs-on: windows-latest
-    
+
     name: Build project
 
     steps:
@@ -74,7 +79,7 @@ jobs:
       - name: Install SteamCMD
         id: steamcmd
         uses: CyberAndrii/setup-steamcmd@v1
-      
+
       # Little hack to let Steam think that we own this game
       - name: Create Steam manifest file
         run: |
@@ -118,17 +123,20 @@ jobs:
           compression-level: 0
           retention-days: 1
           if-no-files-found: error
-  
+
   github-release:
     needs: build
-    
+
     name: Github release
-    
+
     runs-on: windows-latest
-    
+
     permissions:
       contents: write
-    
+
+    outputs:
+      changes: ${{ steps.changelog_reader.outputs.changes }}
+
     steps:
       - uses: actions/checkout@v6
 
@@ -153,7 +161,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: false
           artifacts: ${{ github.workspace }}/${{ env.Name }}.dll
-  
+
   nexusmods-release:
     needs: [ github-release, check-tag ]
 
