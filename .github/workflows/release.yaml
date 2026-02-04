@@ -125,7 +125,7 @@ jobs:
           if-no-files-found: error
 
   github-release:
-    needs: build
+    needs: [ build, check-tag ]
 
     name: Github release
 
@@ -150,13 +150,13 @@ jobs:
         uses: mindsers/changelog-reader-action@v2
         with:
           validation_level: warn
-          version: ${{ needs.build.outputs.tag }}
+          version: ${{ needs.check-tag.outputs.tag }}
           path: ${{ github.workspace }}/CHANGELOG.md
 
       - name: GitHub release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.changelog_reader.outputs.tag }}
+          tag: ${{ needs.check-tag.outputs.tag }}
           body: ${{ steps.changelog_reader.outputs.changes }}
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: false
