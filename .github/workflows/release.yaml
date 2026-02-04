@@ -41,10 +41,10 @@ jobs:
           echo "Current tag: v$CurrentVersion";
           echo "tag=v$CurrentVersion" >> $env:GITHUB_OUTPUT;
           echo "version=$CurrentVersion" >> $env:GITHUB_OUTPUT;
-          $Response = gh api \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/blbrdv/${{ env.Name }}/tags
+          $Response = gh api `
+            -H "Accept: application/vnd.github+json" `
+            -H "X-GitHub-Api-Version: 2022-11-28" `
+            /repos/blbrdv/${{ env.Name }}/tags `
             | ConvertFrom-Json;
           
           foreach ($Tag in $Response) {
