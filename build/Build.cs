@@ -50,8 +50,8 @@ class Build : NukeBuild
     AbsolutePath CompiledPluginPath => PluginsDirectory / CompiledFileName;
     string PackedFileName => AegirProject.Name + "-" + AegirProject.GetProperty("version") + ".zip";
 
-    /// <summary>Clean build and output directories</summary>
     Target Clean => _ => _
+        .Description("Clean build and output directories")
         .Before(Restore)
         .Executes(() =>
         {
@@ -66,8 +66,8 @@ class Build : NukeBuild
             OutputDirectory.CreateOrCleanDirectory();
         });
 
-    /// <summary>Look for and download project dependencies</summary>
     Target Restore => _ => _
+        .Description("Look for and download project dependencies")
         .Requires(() => BuildConfig)
         .Before(Compile)
         .After(Clean)
@@ -77,8 +77,8 @@ class Build : NukeBuild
                 .SetProjectFile(AegirProject));
         });
 
-    /// <summary>Build project</summary>
     Target Compile => _ => _
+        .Description("Build project")
         .Requires(() => BuildConfig)
         .Requires(() => GamePath)
         .Before(PackForNexusmods)
@@ -93,8 +93,8 @@ class Build : NukeBuild
                 .EnableNoRestore());
         });
 
-    /// <summary>Copy compiled file to game plugins directory</summary>
     Target Install => _ => _
+        .Description("Copy compiled file to game plugins directory")
         .After(Compile)
         .Executes(() =>
         {
@@ -105,8 +105,8 @@ class Build : NukeBuild
             Log.Information("Plugin copied to {Target}", PluginsDirectory);
         });
 
-    /// <summary>Pack compiled and other necessary files to zip for NexusMods in output directory</summary>
     Target PackForNexusmods => _ => _
+        .Description("Archive compiled and other necessary files for NexusMods in output directory")
         .After(Compile)
         .Executes(() =>
         {
@@ -142,8 +142,8 @@ class Build : NukeBuild
             Log.Information("Packed files to {Target}", NexusModsOutputDirectory);
         });
 
-    /// <summary>Pack compiled and other necessary files to zip for ThunderStore in output directory</summary>
     Target PackForThunderstore => _ => _
+        .Description("Archive compiled and other necessary files for ThunderStore in output directory")
         .After(Compile)
         .Executes(() =>
         {
@@ -168,10 +168,10 @@ class Build : NukeBuild
             Log.Information("Packed files to {Target}", ThunderStoreOutputDirectory);
         });
 
-    /// <summary>Pack compiled and other necessary files to zip in output directory</summary>
     Target Pack => _ => _
-        .After(PackForNexusmods)
-        .After(PackForThunderstore)
+        .Description("Archive compiled and other necessary files for mod stores in output directory")
+        .DependsOn(PackForNexusmods)
+        .DependsOn(PackForThunderstore)
         .Executes(() =>
         {
             Log.Information("Packed files to {Target}", OutputDirectory);
