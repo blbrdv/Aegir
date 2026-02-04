@@ -150,7 +150,7 @@ jobs:
       - name: Create/update release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.changelog_reader.outputs.version }}
+          tag: ${{ steps.changelog_reader.outputs.tag }}
           body: ${{ steps.changelog_reader.outputs.changes }}
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: false
