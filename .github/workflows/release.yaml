@@ -166,13 +166,13 @@ jobs:
           global-json-file: global.json
 
       - name: Download build artefacts
-      - uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v5
         with:
           name: build
           path: ${{ github.workspace }}/build
 
       - name: Download project artefact
-      - uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v5
         with:
           name: project
           path: ${{ github.workspace }}/src/bin/Release/net46
@@ -207,13 +207,13 @@ jobs:
           global-json-file: global.json
 
       - name: Download build artefacts
-      - uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v5
         with:
           name: build
           path: ${{ github.workspace }}/build
 
       - name: Download project artefact
-      - uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v5
         with:
           name: project
           path: ${{ github.workspace }}/src/bin/Release/net46
