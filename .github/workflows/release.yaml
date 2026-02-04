@@ -147,7 +147,7 @@ jobs:
           version: ${{ needs.build.outputs.tag }}
           path: ${{ github.workspace }}/CHANGELOG.md
 
-      - name: Create/update release
+      - name: GitHub release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.changelog_reader.outputs.tag }}
