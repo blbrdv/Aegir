@@ -159,7 +159,7 @@ jobs:
 
     name: NexusMods release
 
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v6
@@ -200,7 +200,7 @@ jobs:
 
     name: ThunderStore release
 
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v6
