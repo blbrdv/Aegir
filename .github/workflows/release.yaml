@@ -105,9 +105,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: build
-          path: |
-            ${{ github.workspace }}/build/obj/
-            ${{ github.workspace }}/build/bin/
+          path: ${{ github.workspace }}/build/obj/
           compression-level: 0
           retention-days: 1
           if-no-files-found: error
