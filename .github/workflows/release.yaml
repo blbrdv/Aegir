@@ -1,0 +1,238 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - '.github/workflows/release.yaml'
+      - '.nuke/**'
+      - 'build/**'
+      - 'dist/**'
+      - 'src/**'
+      - 'Aegir.sln'
+      - 'run.*'
+      - 'global.json'
+
+env:
+  GAME_ID: 896660
+  GAME_NAME: Valheim dedicated server
+  ContinuousIntegrationBuild: true
+  Game: valheim
+  Name: Aegir
+
+jobs:
+  check-tag:
+    runs-on: windows-latest
+    
+    name: Check release tag existence
+    
+    steps:
+      - uses: actions/checkout@v6
+        
+      - run: |
+          $XML = [Xml] (Get-Content .\MyApp.csproj);
+          $CurrentVersion = [Version] $XML.Project.PropertyGroup.Version;
+          echo "Current version: $CurrentVersion";
+          echo "Current tag: v$CurrentVersion";
+          echo "tag=v$CurrentVersion" >> ${{ GITHUB_OUTPUT }};
+          echo "version=$CurrentVersion" >> ${{ GITHUB_OUTPUT }};
+          $Response = gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/blbrdv/${{ env.Name }}/tags
+            | ConvertFrom-Json;
+          
+          foreach ($Tag in $Response) {
+            if ($Tag.name -eq "v$CurrentVersion") {
+              echo "Tag 'v$CurrentVersion' already exists. Update project version.";
+              exit 1;
+            }
+          }
+      
+  build:
+    needs: check-tag
+    
+    runs-on: windows-latest
+    
+    name: Build project
+
+    steps:
+      - uses: actions/checkout@v6
+        
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Restore build
+        run: dotnet restore "build\_build.csproj"
+
+      - name: Install SteamCMD
+        id: steamcmd
+        uses: CyberAndrii/setup-steamcmd@v1
+      
+      # Little hack to let Steam think that we own this game
+      - name: Create Steam manifest file
+        run: |
+          New-Item -ItemType Directory -Force -Path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ env.GAME_NAME }}" -Verbose:$false
+          $Manifest = @'
+            "AppState"
+            {
+              "appid" "${{ env.GAME_ID }}"
+              "Universe" "1"
+              "installdir" "${{ env.GAME_NAME }}"
+              "StateFlags" "6"
+            }
+          '@
+          
+          $Manifest | Out-File "${{ steps.steamcmd.outputs.directory }}\steamapps\appmanifest_${{ env.GAME_ID }}.acf"
+
+      - name: Download game
+        id: download
+        run: steamcmd +login anonymous +app_update ${{ env.GAME_ID }} validate +quit
+
+      - name: Restore project
+        run: .\run.ps1 restore
+
+      - name: Build project
+        run: .\run.ps1 compile --game-path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ env.GAME_NAME }}"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: build
+          path: |
+            ${{ github.workspace }}/build/obj/
+            ${{ github.workspace }}/build/bin/
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+        
+      - name: Upload project artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: project
+          path: ${{ github.workspace }}/src/bin/Release/net46/Aegit.dll
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+  
+  github-release:
+    needs: build
+    
+    name: Github release
+    
+    runs-on: windows-latest
+    
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Download project artefact
+        uses: actions/download-artifact@v5
+        with:
+          name: project
+          
+      - name: Parse changelog
+        id: changelog_reader
+        uses: mindsers/changelog-reader-action@v2
+        with:
+          validation_level: warn
+          version: ${{ needs.build.outputs.tag }}
+          path: ./CHANGELOG.md
+          
+      - name: Create/update release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.changelog_reader.outputs.version }}
+          body: ${{ steps.changelog_reader.outputs.changes }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: false
+          artifacts: ${{ github.workspace }}/${{ env.Name }}.dll
+  
+  nexusmods-release:
+    needs: [github-release, check-tag]
+
+    name: NexusMods release
+
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Download build artefacts
+      - uses: actions/download-artifact@v5
+        with:
+          name: build
+          path: ${{ github.workspace }}/build
+
+      - name: Download project artefact
+      - uses: actions/download-artifact@v5
+        with:
+          name: project
+          path: ${{ github.workspace }}/src/bin/Release/net46
+
+      - name: Pack artifacts
+        run: .\run.ps1 PackForNexusmods
+        
+      - name: Upload to NexusMods
+        uses: hmlendea/nexusmods-update@latest
+        with:
+          account_email_address: ${{ secrets.NEXUS_EMAIL_ADDRESS }}
+          account_password: ${{ secrets.NEXUS_PASSWORD }}
+          nexus_game_id: ${{ env.Game }}
+          nexus_mod_id: 2400
+          mod_file_name: ${{ env.Name }}
+          mod_version: ${{ needs.check-tag.outputs.version }}
+          file_description: ${{ needs.github-release.outputs.changes }}
+          file_path: ${{ github.workspace }}/output/NexusMods/${{ env.Name }}-${{ needs.check-tag.outputs.version }}.zip
+
+  thunderstore-release:
+    needs: [github-release, check-tag]
+
+    name: ThunderStore release
+
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Download build artefacts
+      - uses: actions/download-artifact@v5
+        with:
+          name: build
+          path: ${{ github.workspace }}/build
+
+      - name: Download project artefact
+      - uses: actions/download-artifact@v5
+        with:
+          name: project
+          path: ${{ github.workspace }}/src/bin/Release/net46
+
+      - name: Pack artifacts
+        run: .\run.ps1 PackForThunderstore
+        
+      - name: Upload mod to ThunderStore
+        uses: dhkatz/thunderstore-publish@v1
+        id: publish
+        with:
+          token: ${{ secrets.THUNDERSTORE_TOKEN }}
+          namespace: blbrdv
+          name: ${{ env.Name }}
+          description: Simple mod for disabling water camera clipping
+          version: ${{ needs.check-tag.outputs.version }}
+          communities: ${{ env.Game }}
+          categories: |
+            mods
+            misc
+            client-side
+          file: ${{ github.workspace }}/output/ThunderStore/${{ env.Name }}-${{ needs.check-tag.outputs.version }}.zip
