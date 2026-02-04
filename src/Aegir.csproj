@@ -36,7 +36,7 @@
             <ReferencePath>$(GamePath)\valheim_Data\Managed\*.dll</ReferencePath>
           </PropertyGroup>
         </When>
-        
+
         <When Condition="Exists('$(GamePath)\valheim_server_Data')">
           <PropertyGroup>
             <ReferencePath>$(GamePath)\valheim_server_Data\Managed\*.dll</ReferencePath>

@@ -1,5 +1,5 @@
-using System.Linq;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Nuke.Common;
 using Nuke.Common.IO;
@@ -14,19 +14,17 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 class Build : NukeBuild
 {
-    public static int Main() => Execute<Build>(x => x.Compile);
+    [Parameter("Path to the BepInEx plugin folder, default is 'BepInEx\\plugins'")]
+    readonly string BepinexPath = @"BepInEx\plugins";
 
     [Parameter("Configuration to build, default is 'Debug'")]
     readonly Configuration BuildConfig = Configuration.Release;
 
     [Parameter("Path to the root of game folder")] readonly string GamePath;
 
-    [Parameter("Path to the BepInEx plugin folder, default is 'BepInEx\\plugins'")]
-    readonly string BepinexPath = @"BepInEx\plugins";
-
     [Solution(GenerateProjects = true)] readonly Solution Solution;
 
-    readonly Encoding UTF8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+    readonly Encoding UTF8NoBom = new UTF8Encoding(false);
 
     Project AegirProject => Solution.Aegir; // just ignore CS1061, it's fine
     string ProjectTargetFramework => AegirProject.GetTargetFrameworks()!.First();
@@ -176,4 +174,6 @@ class Build : NukeBuild
         {
             Log.Information("Packed files to {Target}", OutputDirectory);
         });
+
+    public static int Main() => Execute<Build>(x => x.Compile);
 }

@@ -6,7 +6,7 @@ on:
       target-ref:
         description: The branch, tag or SHA to checkout.
         type: string
-          
+  
   pull_request:
     branches:
       - 'main'
@@ -45,7 +45,7 @@ jobs:
           }
           echo "Ref is '$Ref'";
           echo "target-ref=$Ref" >> $env:GITHUB_OUTPUT;
-          
+  
   build:
     needs: target
     
@@ -63,7 +63,7 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
-      
+
       - name: Restore build
         run: dotnet restore "build\_build.csproj"
 
@@ -86,7 +86,7 @@ jobs:
           '@
           
           $Manifest | Out-File "${{ steps.steamcmd.outputs.directory }}\steamapps\appmanifest_${{ env.GAME_ID }}.acf"
-        
+
       - name: Download game
         id: download
         run: steamcmd +login anonymous +app_update ${{ env.GAME_ID }} validate +quit
@@ -107,7 +107,7 @@ jobs:
 
       - name: Build project
         run: .\run.ps1 compile --game-path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ env.GAME_NAME }}"
-      
+
       - name: Upload build
         uses: actions/upload-artifact@v6
         with:
