@@ -31,7 +31,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - run: |
+      - name: Checking tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
           $XML = [Xml] (Get-Content ${{ github.workspace }}\src\${{ env.Name }}.csproj);
           $CurrentVersion = [Version] $XML.Project.PropertyGroup.Version;
           echo "Current version: $CurrentVersion";
