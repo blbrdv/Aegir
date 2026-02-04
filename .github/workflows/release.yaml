@@ -36,8 +36,8 @@ jobs:
           $CurrentVersion = [Version] $XML.Project.PropertyGroup.Version;
           echo "Current version: $CurrentVersion";
           echo "Current tag: v$CurrentVersion";
-          echo "tag=v$CurrentVersion" >> ${{ GITHUB_OUTPUT }};
-          echo "version=$CurrentVersion" >> ${{ GITHUB_OUTPUT }};
+          echo "tag=v$CurrentVersion" >> $env:GITHUB_OUTPUT;
+          echo "version=$CurrentVersion" >> $env:GITHUB_OUTPUT;
           $Response = gh api \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
