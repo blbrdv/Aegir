@@ -181,7 +181,7 @@ jobs:
           path: ${{ github.workspace }}/src/bin/Release/net46
 
       - name: Pack artifacts
-        run: .\run.ps1 PackForNexusmods
+        run: ./run.sh PackForNexusmods
 
       - name: Upload to NexusMods
         uses: hmlendea/nexusmods-update@latest
@@ -222,7 +222,7 @@ jobs:
           path: ${{ github.workspace }}/src/bin/Release/net46
 
       - name: Pack artifacts
-        run: .\run.ps1 PackForThunderstore
+        run: ./run.sh PackForThunderstore
 
       - name: Upload mod to ThunderStore
         uses: dhkatz/thunderstore-publish@v1.0.1
