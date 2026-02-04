@@ -132,6 +132,8 @@ jobs:
       contents: write
     
     steps:
+      - uses: actions/checkout@v6
+
       - name: Download project artefact
         uses: actions/download-artifact@v5
         with:
@@ -143,7 +145,7 @@ jobs:
         with:
           validation_level: warn
           version: ${{ needs.build.outputs.tag }}
-          path: ./CHANGELOG.md
+          path: ${{ github.workspace }}/CHANGELOG.md
 
       - name: Create/update release
         uses: ncipollo/release-action@v1
