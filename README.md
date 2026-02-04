@@ -48,9 +48,45 @@ This simple mod removes water camera clipping in fly-mode, allowing players to d
 
 ### CI/CD
 
-1. Run `./run.sh Compile --game-path <game root folder>` (or `.\run.ps1 ...` for Windows)
+Run `./run.sh <target> <params...>` (or `.\run.ps1` for Windows)
 
-For more commands see [Build.cs](build/Build.cs) file or run script with `--help` flag.
+#### Usage:
+
+```
+Targets (with their direct dependencies):                                                                                                                            
+
+  Clean               
+    Clean build and output directories
+  Restore             
+    Look for and download project dependencies
+  Compile (default)   
+    Build project
+  Install             
+    Copy compiled file to game plugins directory
+  PackForNexusmods    
+    Archive compiled and other necessary files for NexusMods in output directory
+  PackForThunderstore 
+    Archive compiled and other necessary files for ThunderStore in output directory
+  Pack                 -> PackForNexusmods, PackForThunderstore
+    Archive compiled and other necessary files for mod stores in output directory
+
+Parameters:
+
+  --bepinex-path       Path to the BepInEx plugin folder, default is 'BepInEx\plugins'.
+  --build-config       Configuration to build, default is 'Debug'.
+  --game-path          Path to the root of game folder.
+
+  --continue           Indicates to continue a previously failed build attempt.
+  --help               Shows the help text for this build assembly.
+  --host               Host for execution. Default is 'automatic'.
+  --no-logo            Disables displaying the NUKE logo.
+  --plan               Shows the execution plan (HTML).
+  --profile            Defines the profiles to load.
+  --root               Root directory during build execution.
+  --skip               List of targets to be skipped. Empty list skips all dependencies.
+  --target             List of targets to be invoked. Default is 'Compile'.
+  --verbosity          Logging verbosity during build execution. Default is 'Normal'.
+```
 
 ### FAQ
 
