@@ -37,16 +37,14 @@ This simple mod removes water camera clipping in fly-mode, allowing players to d
 2. Press `Z` to enter fly mode
 3. Enjoy
 
-## Build
+## Developing
 
 ### Requirements
 
 - DotNet v8.0.x installed
     - Download and install from [Microsoft](https://dotnet.microsoft.com/en-us/download/dotnet/6.0).
-- Nuke tool installed
-    - Run `dotnet tool restore` in solution root directory.
 
-### CI/CD
+### Run script
 
 Run `./run.sh <target> <params...>` (or `.\run.ps1` for Windows)
 
