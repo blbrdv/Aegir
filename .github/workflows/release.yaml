@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - run: |
-          $XML = [Xml] (Get-Content .\MyApp.csproj);
+          $XML = [Xml] (Get-Content ${{ github.workspace }}\src\${{ env.Name }}.csproj);
           $CurrentVersion = [Version] $XML.Project.PropertyGroup.Version;
           echo "Current version: $CurrentVersion";
           echo "Current tag: v$CurrentVersion";
