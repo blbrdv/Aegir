@@ -85,7 +85,9 @@ jobs:
             }
           END
           )
+          find "${{ steps.steamcmd.outputs.directory }}/steamapps/common"
           echo "$manifest" > ${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ env.GAME_ID }}.acf
+          cat "${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ env.GAME_ID }}.acf"
 
       - name: Download game
         id: download
