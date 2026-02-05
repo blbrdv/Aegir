@@ -43,6 +43,37 @@ jobs:
           echo "Ref is $ref"
           echo "target-ref=$ref" >> "$GITHUB_OUTPUT"
 
+      - name: Set nuget packages list
+        id: nuget
+        run: |
+          nl=$'\n'
+          output="$(dotnet nuget locals all --list --force-english-output)"
+          r="[^ $nl]+ ([^$nl]+)"
+          paths=""
+          list=""
+
+          while [[ "$output" =~ $r ]]; do
+            value="${x:+x }${BASH_REMATCH[1]}"
+            output=${output#*"${BASH_REMATCH[0]}"}
+            esc=$(echo "$value" | sed 's/\//\\\//g')
+            if [[ "$paths" == "" ]]; then
+              paths="$value"
+              list="'$esc'"
+            else
+              paths="$paths$nl$value"
+              list="$list, '$esc'"
+            fi
+          done
+
+          echo "Nuget paths:"
+          echo "$paths"
+          echo "paths<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$paths" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          echo "As list:"
+          echo "$list:
+          echo "list=$list" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v6
         with:
           repository: 'blbrdv/Aegir'
@@ -52,12 +83,9 @@ jobs:
       - uses: actions/cache@v5
         with:
           path: |
-            /home/runner/.local/share/NuGet/http-cache
-            /home/runner/.nuget/packages/
-            /tmp/NuGetScratchrunner
-            /home/runner/.local/share/NuGet/plugin-cache
+            ${{ steps.nuget.outputs.paths }}
             ${{ github.workspace }}/build/obj
-          key: build-${{ hashFiles('/home/runner/.local/share/NuGet/http-cache/**', '/home/runner/.nuget/packages/**', '/tmp/NuGetScratchrunner/**', '/home/runner/.local/share/NuGet/plugin-cache/**', 'global.json', './.nuke/**', './build/**', '!./build/bin/**', '!./build/obj/**') }}
+          key: build-${{ hashFiles(steps.nuget.outputs.list, 'global.json', './.nuke/**', './build/**', '!./build/obj/**') }}
           restore-keys: build-
           enableCrossOsArchive: true
 
