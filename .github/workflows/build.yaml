@@ -21,15 +21,16 @@ on:
       - 'global.json'
 
 env:
-  GAME_ID: 896660
-  GAME_NAME: Valheim dedicated server
   ContinuousIntegrationBuild: true
 
 jobs:
-  build:
+  target:
     runs-on: ubuntu-latest
 
-    name: Build
+    name: Set target ref
+
+    outputs:
+      target-ref: ${{ steps.ref.outputs.target-ref }}
 
     steps:
       - name: Set target ref
@@ -43,121 +44,9 @@ jobs:
           echo "Ref is $ref"
           echo "target-ref=$ref" >> "$GITHUB_OUTPUT"
 
-      - name: Set nuget packages list
-        id: nuget
-        run: |
-          nl=$'\n'
-          output="$(dotnet nuget locals all --list --force-english-output)"
-          r="[^ $nl]+ ([^$nl]+)"
-          paths=""
-          list=""
+  build:
+    needs: target
 
-          while [[ "$output" =~ $r ]]; do
-            value="${x:+x }${BASH_REMATCH[1]}"
-            output=${output#*"${BASH_REMATCH[0]}"}
-            esc=$(echo "$value/**" | sed 's/\//\\\//g')
-            if [[ "$paths" == "" ]]; then
-              paths="$value"
-              list="'$esc'"
-            else
-              paths="$paths$nl$value"
-              list="$list, '$esc'"
-            fi
-          done
-
-          echo "Nuget paths:"
-          echo "$paths"
-          echo "paths<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$paths" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-          echo "As list:"
-          echo "$list"
-          echo "list=$list" >> "$GITHUB_OUTPUT"
-
-      - uses: actions/checkout@v6
-        with:
-          repository: 'blbrdv/Aegir'
-          ref: ${{ steps.ref.outputs.target-ref }}
-          fetch-depth: 0
-
-      - uses: actions/cache@v5
-        with:
-          path: |
-            ${{ steps.nuget.outputs.paths }}
-            ${{ github.workspace }}/build/obj
-          key: build-${{ hashFiles(steps.nuget.outputs.list, 'global.json', './.nuke/**', './build/**', '!./build/obj/**') }}
-          restore-keys: build-
-          enableCrossOsArchive: true
-
-      - uses: actions/setup-dotnet@v5
-        with:
-          global-json-file: global.json
-
-      - name: Restore build
-        run: dotnet restore "build/_build.csproj"
-
-      - name: Install SteamCMD
-        id: steamcmd
-        uses: CyberAndrii/setup-steamcmd@v1
-
-      - name: Set game path
-        id: game-path
-        run: |
-          value="${{ steps.steamcmd.outputs.directory }}/steamapps/common/${{ env.GAME_NAME }}"
-          echo "Game path is $value"
-          echo "value=$value" >> "$GITHUB_OUTPUT"
-
-      # Little hack to let Steam think that we own this game
-      - name: Create Steam manifest file
-        run: |
-          mkdir -p "${{ steps.game-path.outputs.value }}"
-          manifest=$(cat <<-END
-            "AppState"
-            {
-              "appid" "${{ env.GAME_ID }}"
-              "Universe" "1"
-              "installdir" "${{ env.GAME_NAME }}"
-              "StateFlags" "6"
-            }
-          END
-          )
-          echo "$manifest" > ${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ env.GAME_ID }}.acf
-          set -x
-          find "${{ steps.steamcmd.outputs.directory }}/steamapps/common"
-          cat "${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ env.GAME_ID }}.acf"
-
-      - name: Download game
-        id: download
-        run: |
-          s=0
-          n=1
-          until [ "$n" -ge 4 ]; do
-            echo "Attempt #$n"
-            steamcmd +force_install_dir "${{ steps.game-path.outputs.value }}" +login anonymous +app_update ${{ env.GAME_ID }} validate +quit && break || s=$?
-            if [ "$s" -eq 8 ]; then
-              n=$((n+1))
-            else
-              exit $s
-            fi
-            if [ "$n" -lt 3 ]; then
-              sleep 5
-            fi 
-          done
-
-          set -x
-          find "${{ steps.game-path.outputs.value }}" -type d
-
-      - name: Restore project
-        run: ./run.sh restore
-
-      - name: Build project
-        run: ./run.sh compile --game-path "${{ steps.game-path.outputs.value }}"
-
-      - name: Upload build
-        uses: actions/upload-artifact@v6
-        with:
-          name: plugin-${{ github.sha }}
-          path: ${{ github.workspace }}/src/bin/Release/net46/Aegir.dll
-          compression-level: 0
-          retention-days: 1
-          if-no-files-found: error
+    uses: blbrdv/Aegir/.github/workflows/build-project.yaml@v1
+    with:
+      target-ref: ${{ needs.target.outputs.target-ref }}

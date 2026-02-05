@@ -1,0 +1,93 @@
+name: 'Build project'
+
+on:
+  workflow_call:
+    inputs:
+      target-ref:
+        required: true
+        type: string
+
+env:
+  GAME_ID: 896660
+  GAME_NAME: Valheim dedicated server
+  ContinuousIntegrationBuild: true
+
+jobs:
+  build-project:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          repository: 'blbrdv/Aegir'
+          ref: ${{ inputs.target-ref }}
+          fetch-depth: 0
+
+      - name: Dotnet restore
+        uses: ./.github/actions/restore
+  
+      - name: Install SteamCMD
+        id: steamcmd
+        uses: CyberAndrii/setup-steamcmd@v1
+  
+      - name: Set game path
+        id: game-path
+        run: |
+          value="${{ steps.steamcmd.outputs.directory }}/steamapps/common/${{ env.GAME_NAME }}"
+          echo "Game path is $value"
+          echo "value=$value" >> "$GITHUB_OUTPUT"
+  
+      # Little hack to let Steam think that we own this game
+      - name: Create Steam manifest file
+        run: |
+          mkdir -p "${{ steps.game-path.outputs.value }}"
+          manifest=$(cat <<-END
+            "AppState"
+            {
+              "appid" "${{ env.GAME_ID }}"
+              "Universe" "1"
+              "installdir" "${{ env.GAME_NAME }}"
+              "StateFlags" "6"
+            }
+          END
+          )
+          echo "$manifest" > ${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ env.GAME_ID }}.acf
+          set -x
+          find "${{ steps.steamcmd.outputs.directory }}/steamapps/common"
+          cat "${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ env.GAME_ID }}.acf"
+  
+      - name: Download game
+        id: download
+        run: |
+          s=0
+          n=1
+          until [ "$n" -ge 4 ]; do
+            echo "Attempt #$n"
+            steamcmd +force_install_dir "${{ steps.game-path.outputs.value }}" +login anonymous +app_update ${{ env.GAME_ID }} validate +quit && break || s=$?
+            if [ "$s" -eq 8 ]; then
+              n=$((n+1))
+            else
+              exit $s
+            fi
+            if [ "$n" -lt 3 ]; then
+              sleep 5
+            fi 
+          done
+  
+          set -x
+          find "${{ steps.game-path.outputs.value }}" -type d
+  
+      - name: Restore project
+        run: ./run.sh restore
+  
+      - name: Build project
+        run: ./run.sh compile --game-path "${{ steps.game-path.outputs.value }}"
+  
+      - name: Upload build
+        uses: actions/upload-artifact@v6
+        with:
+          name: plugin-${{ github.sha }}
+          path: ${{ github.workspace }}/src/bin/Release/net46/Aegir.dll
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error

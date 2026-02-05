@@ -16,8 +16,6 @@ on:
       - 'global.json'
 
 env:
-  GAME_ID: 896660
-  GAME_NAME: Valheim dedicated server
   ContinuousIntegrationBuild: true
   Game: valheim
   Name: Aegir
@@ -62,74 +60,18 @@ jobs:
   build:
     needs: check-tag
 
-    runs-on: windows-latest
-
     name: Build project
 
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-dotnet@v5
-        with:
-          global-json-file: global.json
-
-      - name: Restore build
-        run: dotnet restore "build\_build.csproj"
-
-      - name: Install SteamCMD
-        id: steamcmd
-        uses: CyberAndrii/setup-steamcmd@v1
-
-      # Little hack to let Steam think that we own this game
-      - name: Create Steam manifest file
-        run: |
-          New-Item -ItemType Directory -Force -Path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ env.GAME_NAME }}" -Verbose:$false
-          $Manifest = @'
-            "AppState"
-            {
-              "appid" "${{ env.GAME_ID }}"
-              "Universe" "1"
-              "installdir" "${{ env.GAME_NAME }}"
-              "StateFlags" "6"
-            }
-          '@
-          
-          $Manifest | Out-File "${{ steps.steamcmd.outputs.directory }}\steamapps\appmanifest_${{ env.GAME_ID }}.acf"
-
-      - name: Download game
-        id: download
-        run: steamcmd +login anonymous +app_update ${{ env.GAME_ID }} validate +quit
-
-      - name: Restore project
-        run: .\run.ps1 restore
-
-      - name: Build project
-        run: .\run.ps1 compile --game-path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ env.GAME_NAME }}"
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v6
-        with:
-          name: build
-          path: ${{ github.workspace }}/build/obj/
-          compression-level: 0
-          retention-days: 1
-          if-no-files-found: error
-
-      - name: Upload project artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: project
-          path: ${{ github.workspace }}/src/bin/Release/net46/${{ env.Name }}.dll
-          compression-level: 0
-          retention-days: 1
-          if-no-files-found: error
+    uses: blbrdv/Aegir/.github/workflows/build-project.yaml@v1
+    with:
+      target-ref: 'main'
 
   github-release:
     needs: [ build, check-tag ]
 
     name: Github release
 
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     permissions:
       contents: write
@@ -143,7 +85,7 @@ jobs:
       - name: Download project artefact
         uses: actions/download-artifact@v5
         with:
-          name: project
+          name: plugin-${{ github.sha }}
 
       - name: Parse changelog
         id: changelog_reader
@@ -172,20 +114,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-dotnet@v5
-        with:
-          global-json-file: global.json
-
-      - name: Download build artefacts
-        uses: actions/download-artifact@v5
-        with:
-          name: build
-          path: ${{ github.workspace }}/build
+      - name: Dotnet restore
+        uses: ./.github/actions/restore
 
       - name: Download project artefact
         uses: actions/download-artifact@v5
         with:
-          name: project
+          name: plugin-${{ github.sha }}
           path: ${{ github.workspace }}/src/bin/Release/net46
 
       - name: Pack artifacts
@@ -213,20 +148,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-dotnet@v5
-        with:
-          global-json-file: global.json
+      - name: Dotnet restore
+        uses: ./.github/actions/restore
 
       - name: Download build artefacts
         uses: actions/download-artifact@v5
         with:
-          name: build
-          path: ${{ github.workspace }}/build
-
-      - name: Download project artefact
-        uses: actions/download-artifact@v5
-        with:
-          name: project
+          name: plugin-${{ github.sha }}
           path: ${{ github.workspace }}/src/bin/Release/net46
 
       - name: Pack artifacts
