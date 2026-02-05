@@ -106,7 +106,7 @@ jobs:
         run: ./run.sh restore
 
       - name: Build project
-        run: ../run.sh compile --game-path "${{ steps.steamcmd.outputs.directory }}/steamapps/common/${{ env.GAME_NAME }}"
+        run: ./run.sh compile --game-path "${{ steps.steamcmd.outputs.directory }}/steamapps/common/${{ env.GAME_NAME }}"
 
       - name: Upload build
         uses: actions/upload-artifact@v6
