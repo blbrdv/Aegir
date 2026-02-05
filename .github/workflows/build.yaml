@@ -27,8 +27,6 @@ env:
 
 jobs:
   build:
-    needs: target
-
     runs-on: ubuntu-latest
 
     name: Build
