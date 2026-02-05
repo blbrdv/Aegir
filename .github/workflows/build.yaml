@@ -71,7 +71,7 @@ jobs:
           echo "$paths" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
           echo "As list:"
-          echo "$list:
+          echo "$list"
           echo "list=$list" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v6
