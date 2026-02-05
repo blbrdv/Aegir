@@ -6,7 +6,7 @@ on:
       target-ref:
         description: The branch, tag or SHA to checkout.
         type: string
-  
+
   pull_request:
     branches:
       - 'main'
@@ -28,8 +28,8 @@ env:
 jobs:
   target:
     name: Set target
-    
-    runs-on: windows-latest
+
+    runs-on: ubuntu-latest
 
     outputs:
       target-ref: ${{ steps.ref.outputs.target-ref }}
@@ -38,18 +38,18 @@ jobs:
       - name: Setting target ref
         id: ref
         run: |
-          if ( "true" -eq "${{ inputs.target-ref == '' }}" ) {
-            $Ref = "${{ github.ref }}";
-          } else {
-            $Ref = "${{ inputs.target-ref }}"
-          }
-          echo "Ref is '$Ref'";
-          echo "target-ref=$Ref" >> $env:GITHUB_OUTPUT;
-  
+          if [[ "true" == "${{ inputs.target-ref == '' }}" ]]; then
+            ref="${{ github.ref }}"
+          else
+            ref="${{ inputs.target-ref }}"
+          fi
+          echo "Ref is $ref"
+          echo "target-ref=$ref" >> "$GITHUB_OUTPUT"
+
   build:
     needs: target
-    
-    runs-on: windows-latest
+
+    runs-on: ubuntu-latest
 
     name: Build
 
@@ -65,17 +65,17 @@ jobs:
           global-json-file: global.json
 
       - name: Restore build
-        run: dotnet restore "build\_build.csproj"
+        run: dotnet restore "build/_build.csproj"
 
       - name: Install SteamCMD
         id: steamcmd
         uses: CyberAndrii/setup-steamcmd@v1
-      
+
       # Little hack to let Steam think that we own this game
       - name: Create Steam manifest file
         run: |
-          New-Item -ItemType Directory -Force -Path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ env.GAME_NAME }}" -Verbose:$false
-          $Manifest = @'
+          mkdir -p ${{ steps.steamcmd.outputs.directory }}/steamapps/common/${{ env.GAME_NAME }}
+          manifest=$(cat <<-END
             "AppState"
             {
               "appid" "${{ env.GAME_ID }}"
@@ -83,9 +83,9 @@ jobs:
               "installdir" "${{ env.GAME_NAME }}"
               "StateFlags" "6"
             }
-          '@
-          
-          $Manifest | Out-File "${{ steps.steamcmd.outputs.directory }}\steamapps\appmanifest_${{ env.GAME_ID }}.acf"
+          END
+          )
+          echo "$manifest" > ${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ env.GAME_ID }}.acf
 
       - name: Download game
         id: download
@@ -103,10 +103,10 @@ jobs:
           if-no-files-found: error
 
       - name: Restore project
-        run: .\run.ps1 restore
+        run: ./run.sh restore
 
       - name: Build project
-        run: .\run.ps1 compile --game-path "${{ steps.steamcmd.outputs.directory }}\steamapps\common\${{ env.GAME_NAME }}"
+        run: ../run.sh compile --game-path "${{ steps.steamcmd.outputs.directory }}/steamapps/common/${{ env.GAME_NAME }}"
 
       - name: Upload build
         uses: actions/upload-artifact@v6
