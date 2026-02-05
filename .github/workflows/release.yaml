@@ -77,9 +77,6 @@ jobs:
     permissions:
       contents: write
 
-    outputs:
-      changes: ${{ steps.changelog_reader.outputs.changes }}
-
     steps:
       - uses: actions/checkout@v6
 
@@ -104,75 +101,3 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: false
           artifacts: ${{ github.workspace }}/${{ env.Name }}.dll
-
-  nexusmods-release:
-    needs: [ github-release, check-tag ]
-
-    name: NexusMods release
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Dotnet restore
-        uses: ./.github/actions/restore
-
-      - name: Download project artefact
-        uses: actions/download-artifact@v5
-        with:
-          name: plugin-${{ github.sha }}
-          path: ${{ github.workspace }}/src/bin/Release/net46
-
-      - name: Pack artifacts
-        run: ./run.sh PackForNexusmods
-
-      - name: Upload to NexusMods
-        uses: hmlendea/nexusmods-update@latest
-        with:
-          account_email_address: ${{ secrets.NEXUS_EMAIL_ADDRESS }}
-          account_password: ${{ secrets.NEXUS_PASSWORD }}
-          nexus_game_id: ${{ env.Game }}
-          nexus_mod_id: 2400
-          mod_file_name: ${{ env.Name }}
-          mod_version: ${{ needs.check-tag.outputs.version }}
-          file_description: ${{ needs.github-release.outputs.changes }}
-          file_path: ${{ github.workspace }}/output/NexusMods/${{ env.Name }}-${{ needs.check-tag.outputs.version }}.zip
-
-  thunderstore-release:
-    needs: [ github-release, check-tag ]
-
-    name: ThunderStore release
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Dotnet restore
-        uses: ./.github/actions/restore
-
-      - name: Download build artefacts
-        uses: actions/download-artifact@v5
-        with:
-          name: plugin-${{ github.sha }}
-          path: ${{ github.workspace }}/src/bin/Release/net46
-
-      - name: Pack artifacts
-        run: ./run.sh PackForThunderstore
-
-      - name: Upload mod to ThunderStore
-        uses: dhkatz/thunderstore-publish@v1.0.1
-        id: publish
-        with:
-          token: ${{ secrets.THUNDERSTORE_TOKEN }}
-          namespace: blbrdv
-          name: ${{ env.Name }}
-          description: Simple mod for disabling water camera clipping
-          version: ${{ needs.check-tag.outputs.version }}
-          communities: ${{ env.Game }}
-          categories: |
-            mods
-            misc
-            client-side
-          file: ${{ github.workspace }}/output/ThunderStore/${{ env.Name }}-${{ needs.check-tag.outputs.version }}.zip
