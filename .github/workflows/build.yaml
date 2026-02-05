@@ -100,7 +100,7 @@ jobs:
       - name: Download game
         id: download
         run: |
-          steamcmd +force_install_dir  +login anonymous +app_update ${{ env.GAME_ID }} validate +quit
+          steamcmd +force_install_dir ${{ steps.game-path.outputs.value }} +login anonymous +app_update ${{ env.GAME_ID }} validate +quit
           set -x
           find "${{ steps.game-path.outputs.value }}" -type d
 
