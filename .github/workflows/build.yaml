@@ -74,7 +74,7 @@ jobs:
       # Little hack to let Steam think that we own this game
       - name: Create Steam manifest file
         run: |
-          mkdir -p ${{ steps.steamcmd.outputs.directory }}/steamapps/common/${{ env.GAME_NAME }}
+          mkdir -p "${{ steps.steamcmd.outputs.directory }}/steamapps/common/${{ env.GAME_NAME }}"
           manifest=$(cat <<-END
             "AppState"
             {
@@ -85,8 +85,10 @@ jobs:
             }
           END
           )
+          echo "Created dirs:"
           find "${{ steps.steamcmd.outputs.directory }}/steamapps/common"
           echo "$manifest" > ${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ env.GAME_ID }}.acf
+          echo "Created manifest file:"
           cat "${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ env.GAME_ID }}.acf"
 
       - name: Download game
