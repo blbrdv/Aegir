@@ -129,7 +129,21 @@ jobs:
       - name: Download game
         id: download
         run: |
-          steamcmd +force_install_dir "${{ steps.game-path.outputs.value }}" +login anonymous +app_update ${{ env.GAME_ID }} validate +quit
+          s=0
+          n=1
+          until [ "$n" -ge 4 ]; do
+            echo "Attempt #$n"
+            steamcmd +force_install_dir "${{ steps.game-path.outputs.value }}" +login anonymous +app_update ${{ env.GAME_ID }} validate +quit && break || s=$?
+            if [ "$s" -eq 8 ]; then
+              n=$((n+1))
+            else
+              exit $s
+            fi
+            if [ "$n" -lt 3 ]; then
+              sleep 5
+            fi 
+          done
+
           set -x
           find "${{ steps.game-path.outputs.value }}" -type d
 
