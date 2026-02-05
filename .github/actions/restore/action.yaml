@@ -50,4 +50,5 @@ runs:
         global-json-file: global.json
 
     - name: Restore build
+      shell: bash
       run: dotnet restore "build/_build.csproj"
