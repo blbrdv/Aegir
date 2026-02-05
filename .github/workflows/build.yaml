@@ -71,10 +71,17 @@ jobs:
         id: steamcmd
         uses: CyberAndrii/setup-steamcmd@v1
 
+      - name: Set game path
+        id: game-path
+        run: |
+          value="${{ steps.steamcmd.outputs.directory }}/steamapps/common/${{ env.GAME_NAME }}"
+          echo "Game path is $value"
+          echo "value=$value" >> "$GITHUB_OUTPUT"
+
       # Little hack to let Steam think that we own this game
       - name: Create Steam manifest file
         run: |
-          mkdir -p "${{ steps.steamcmd.outputs.directory }}/steamapps/common/${{ env.GAME_NAME }}"
+          mkdir -p "${{ steps.game-path.outputs.value }}"
           manifest=$(cat <<-END
             "AppState"
             {
@@ -85,24 +92,23 @@ jobs:
             }
           END
           )
-          echo "Created dirs:"
-          find "${{ steps.steamcmd.outputs.directory }}/steamapps/common"
           echo "$manifest" > ${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ env.GAME_ID }}.acf
-          echo "Created manifest file:"
+          set -x
+          find "${{ steps.steamcmd.outputs.directory }}/steamapps/common"
           cat "${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ env.GAME_ID }}.acf"
 
       - name: Download game
         id: download
         run: |
-          steamcmd +login anonymous +app_update ${{ env.GAME_ID }} validate +quit
-          echo "Game directory structure:"
-          find "${{ steps.steamcmd.outputs.directory }}/steamapps/common/${{ env.GAME_NAME }}" -type d
+          steamcmd +force_install_dir  +login anonymous +app_update ${{ env.GAME_ID }} validate +quit
+          set -x
+          find "${{ steps.game-path.outputs.value }}" -type d
 
       - name: Restore project
         run: ./run.sh restore
 
       - name: Build project
-        run: ./run.sh compile --game-path "${{ steps.steamcmd.outputs.directory }}/steamapps/common/${{ env.GAME_NAME }}"
+        run: ./run.sh compile --game-path "${{ steps.game-path.outputs.value }}"
 
       - name: Upload build
         uses: actions/upload-artifact@v6
