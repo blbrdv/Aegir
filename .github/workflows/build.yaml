@@ -84,7 +84,7 @@ jobs:
           path: |
             ${{ steps.nuget.outputs.paths }}
             ${{ github.workspace }}/build/obj
-          key: build-${{ hashFiles(${{ steps.nuget.outputs.list }}, 'global.json', './.nuke/**', './build/**', '!./build/bin/**', '!./build/obj/**') }}
+          key: build-${{ hashFiles(steps.nuget.outputs.list, 'global.json', './.nuke/**', './build/**', '!./build/bin/**', '!./build/obj/**') }}
           restore-keys: build-
           enableCrossOsArchive: true
 
