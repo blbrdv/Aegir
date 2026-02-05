@@ -26,13 +26,12 @@ env:
   ContinuousIntegrationBuild: true
 
 jobs:
-  target:
-    name: Set target
+  build:
+    needs: target
 
     runs-on: ubuntu-latest
 
-    outputs:
-      target-ref: ${{ steps.ref.outputs.target-ref }}
+    name: Build
 
     steps:
       - name: Setting target ref
@@ -46,18 +45,10 @@ jobs:
           echo "Ref is $ref"
           echo "target-ref=$ref" >> "$GITHUB_OUTPUT"
 
-  build:
-    needs: target
-
-    runs-on: ubuntu-latest
-
-    name: Build
-
-    steps:
       - uses: actions/checkout@v6
         with:
           repository: 'blbrdv/Aegir'
-          ref: ${{ needs.target.outputs.target-ref }}
+          ref: ${{ steps.ref.outputs.outputs.target-ref }}
           fetch-depth: 0
 
       - uses: actions/cache@v5
