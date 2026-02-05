@@ -32,7 +32,7 @@ jobs:
     name: Build
 
     steps:
-      - name: Setting target ref
+      - name: Set target ref
         id: ref
         run: |
           if [[ "true" == "${{ inputs.target-ref == '' }}" ]]; then
@@ -43,6 +43,28 @@ jobs:
           echo "Ref is $ref"
           echo "target-ref=$ref" >> "$GITHUB_OUTPUT"
 
+      - name: Set nuget packages list
+        id: nuget
+        run: |
+          nl=$'\n'
+          output="$(dotnet nuget locals all --list --force-english-output)"
+          r="[^ $nl]+ ([^$nl]+)"
+          list=""
+
+          while [[ "$output" =~ $r ]]; do
+            value="${x:+x }${BASH_REMATCH[1]}"
+            output=${output#*"${BASH_REMATCH[0]}"}
+            if [[ "$list" == "" ]]; then
+              list="$value"
+            else
+              list="$list$nl$value"
+            fi
+          done
+
+          echo "Nuget list:"
+          echo "$list"
+          echo "list=$list" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v6
         with:
           repository: 'blbrdv/Aegir'
@@ -51,7 +73,9 @@ jobs:
 
       - uses: actions/cache@v5
         with:
-          path: ${{ github.workspace }}/build/obj
+          path: |
+            ${{ steps.nuget.outputs.list }}
+            ${{ github.workspace }}/build/obj
           key: build-${{ hashFiles('global.json', './.nuke/**', './build/**', '!./build/bin/**', '!./build/obj/**') }}
           restore-keys: build-
           enableCrossOsArchive: true
