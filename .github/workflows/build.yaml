@@ -49,23 +49,29 @@ jobs:
           nl=$'\n'
           output="$(dotnet nuget locals all --list --force-english-output)"
           r="[^ $nl]+ ([^$nl]+)"
+          paths=""
           list=""
 
           while [[ "$output" =~ $r ]]; do
             value="${x:+x }${BASH_REMATCH[1]}"
             output=${output#*"${BASH_REMATCH[0]}"}
-            if [[ "$list" == "" ]]; then
-              list="$value"
+            if [[ "$paths" == "" ]]; then
+              paths="$value"
+              list="'$value'"
             else
-              list="$list$nl$value"
+              paths="$paths$nl$value"
+              list="$list, '$value'"
             fi
           done
 
-          echo "Nuget list:"
-          echo "$list"
-          echo "list<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$list" >> "$GITHUB_OUTPUT"
+          echo "Nuget paths:"
+          echo "$paths"
+          echo "paths<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$paths" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
+          echo "As list:"
+          echo "$list:
+          echo "list=$list" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v6
         with:
@@ -76,9 +82,9 @@ jobs:
       - uses: actions/cache@v5
         with:
           path: |
-            ${{ steps.nuget.outputs.list }}
+            ${{ steps.nuget.outputs.paths }}
             ${{ github.workspace }}/build/obj
-          key: build-${{ hashFiles('global.json', './.nuke/**', './build/**', '!./build/bin/**', '!./build/obj/**') }}
+          key: build-${{ hashFiles(${{ steps.nuget.outputs.list }}, 'global.json', './.nuke/**', './build/**', '!./build/bin/**', '!./build/obj/**') }}
           restore-keys: build-
           enableCrossOsArchive: true
 
