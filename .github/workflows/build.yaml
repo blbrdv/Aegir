@@ -92,17 +92,6 @@ jobs:
       - name: Download game
         id: download
         run: steamcmd +login anonymous +app_update ${{ env.GAME_ID }} validate +quit
-      
-      # Upload SteamCMD logs to workflow artefacts if downloading game failed
-      - name: Upload logs
-        if: always() && steps.download.conclusion == 'failure'
-        uses: actions/upload-artifact@v6
-        with:
-          name: downloading-logs-${{ github.sha }}
-          path: ${{ steps.steamcmd.outputs.directory }}/logs/
-          compression-level: 0
-          retention-days: 7
-          if-no-files-found: error
 
       - name: Restore project
         run: ./run.sh restore
