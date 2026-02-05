@@ -7,6 +7,7 @@ on:
       - 'main'
     paths:
       - '.github/workflows/release.yaml'
+      - '.github/workflows/build-project.yaml'
       - '.nuke/**'
       - 'build/**'
       - 'dist/**'
@@ -62,7 +63,7 @@ jobs:
 
     name: Build project
 
-    uses: blbrdv/Aegir/.github/workflows/build-project.yaml@v1
+    uses: ./.github/workflows/build-project.yaml
     with:
       target-ref: 'main'
 

@@ -12,6 +12,7 @@ on:
       - 'main'
     paths:
       - '.github/workflows/build.yaml'
+      - '.github/workflows/build-project.yaml'
       - '.nuke/**'
       - 'build/**'
       - 'dist/**'
@@ -47,6 +48,6 @@ jobs:
   build:
     needs: target
 
-    uses: blbrdv/Aegir/.github/workflows/build-project.yaml@v1
+    uses: ./.github/workflows/build-project.yaml
     with:
       target-ref: ${{ needs.target.outputs.target-ref }}
