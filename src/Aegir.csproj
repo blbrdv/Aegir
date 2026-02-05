@@ -45,7 +45,7 @@
 
         <Otherwise>
           <PropertyGroup>
-            <ReferencePath/>
+            <ErrorMessage>Can not find data directory ('valheim_Data' or 'valheim_server_Data') in '$(GamePath)'.</ErrorMessage>
           </PropertyGroup>
         </Otherwise>
       </Choose>
@@ -53,13 +53,13 @@
 
     <Otherwise>
       <PropertyGroup>
-        <ReferencePath/>
+        <ErrorMessage>Directory '$(GamePath)' does not exists.</ErrorMessage>
       </PropertyGroup>
     </Otherwise>
   </Choose>
 
   <Target Name="ReferenceGameFiles" BeforeTargets="PrepareForBuild">
-    <Error Condition="'$(ReferencePath)' == ''" Text="Folder '$(GamePath)' is not game root or does not exists."/>
+    <Error Condition="'$(ErrorMessage)' != ''" Text="$(ErrorMessage)"/>
     <ItemGroup>
       <Reference Include="$(ReferencePath)"/>
     </ItemGroup>

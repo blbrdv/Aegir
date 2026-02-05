@@ -1,0 +1,54 @@
+name: 'Restore build'
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Set nuget packages list
+      id: nuget
+      shell: bash
+      run: |
+        nl=$'\n'
+        output="$(dotnet nuget locals all --list --force-english-output)"
+        r="[^ $nl]+ ([^$nl]+)"
+        paths=""
+        list=""
+        
+        while [[ "$output" =~ $r ]]; do
+          value="${x:+x }${BASH_REMATCH[1]}"
+          output=${output#*"${BASH_REMATCH[0]}"}
+          esc=$(echo "$value/**" | sed 's/\//\\\//g')
+          if [[ "$paths" == "" ]]; then
+            paths="$value"
+            list="'$esc'"
+          else
+            paths="$paths$nl$value"
+            list="$list, '$esc'"
+          fi
+        done
+        
+        echo "Nuget paths:"
+        echo "$paths"
+        echo "paths<<EOF" >> "$GITHUB_OUTPUT"
+        echo "$paths" >> "$GITHUB_OUTPUT"
+        echo "EOF" >> "$GITHUB_OUTPUT"
+        echo "As list:"
+        echo "$list"
+        echo "list=$list" >> "$GITHUB_OUTPUT"
+
+    - uses: actions/cache@v5
+      with:
+        path: |
+          ${{ steps.nuget.outputs.paths }}
+          ${{ github.workspace }}/build/obj
+        key: build-${{ hashFiles(steps.nuget.outputs.list, 'global.json', './.nuke/**', './build/**', '!./build/obj/**') }}
+        restore-keys: build-
+        enableCrossOsArchive: true
+
+    - uses: actions/setup-dotnet@v5
+      with:
+        global-json-file: global.json
+
+    - name: Restore build
+      shell: bash
+      run: dotnet restore "build/_build.csproj"
