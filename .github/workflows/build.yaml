@@ -93,7 +93,10 @@ jobs:
 
       - name: Download game
         id: download
-        run: steamcmd +login anonymous +app_update ${{ env.GAME_ID }} validate +quit
+        run: |
+          steamcmd +login anonymous +app_update ${{ env.GAME_ID }} validate +quit
+          echo "Game directory structure:"
+          find "${{ steps.steamcmd.outputs.directory }}/steamapps/common/${{ env.GAME_NAME }}" -type d
 
       - name: Restore project
         run: ./run.sh restore
