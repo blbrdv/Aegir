@@ -60,6 +60,13 @@ jobs:
           ref: ${{ needs.target.outputs.target-ref }}
           fetch-depth: 0
 
+      - uses: actions/cache@v5
+        with:
+          path: ${{ github.workspace }}/build/obj
+          key: build-${{ hashFiles('global.json', './.nuke/**', './build/**', '!./build/bin/**', '!./build/obj/**') }}
+          restore-keys: build-
+          enableCrossOsArchive: true
+
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
