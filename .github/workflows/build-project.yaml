@@ -79,6 +79,13 @@ jobs:
   
       - name: Restore project
         run: ./run.sh restore
+      
+      - name: Get TFM
+        id: tfm
+        run: |
+          value=$(dotnet msbuild "${{ github.workspace }}/src/Aegir.csproj" -getProperty:TargetFramework)
+          echo "Project Target Framework Moniker: $value"
+          echo "value=$value" >> "$GITHUB_OUTPUT"
   
       - name: Build project
         run: ./run.sh compile --game-path "${{ steps.game-path.outputs.value }}"
@@ -87,7 +94,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: plugin-${{ github.sha }}
-          path: ${{ github.workspace }}/src/bin/Release/net46/Aegir.dll
+          path: ${{ github.workspace }}/src/bin/Release/${{ steps.tfm.outputs.value }}/Aegir.dll
           compression-level: 0
           retention-days: 1
           if-no-files-found: error
