@@ -18,35 +18,39 @@ class Build : NukeBuild
     readonly string BepinexPath = @"BepInEx\plugins";
 
     [Parameter("Configuration to build, default is 'Debug'")]
-    readonly Configuration BuildConfig = Configuration.Release;
+    readonly Configuration BuildConfig = Configuration.Debug;
 
-    [Parameter("Path to the root of game folder")] readonly string GamePath;
+    [Parameter("Path to the root of game folder")] 
+    readonly string GamePath;
 
-    [Solution(GenerateProjects = true)] readonly Solution Solution;
+    [Solution(GenerateProjects = true)] 
+    readonly Solution Solution;
 
-    readonly Encoding UTF8NoBom = new UTF8Encoding(false);
+    readonly Encoding Utf8NoBom = new UTF8Encoding(false);
 
     Project AegirProject => Solution.Aegir; // just ignore CS1061, it's fine
     string ProjectTargetFramework => AegirProject.GetTargetFrameworks()!.First();
-    AbsolutePath MainChangelog => RootDirectory / "CHANGELOG.md";
-    AbsolutePath SourceDirectory => RootDirectory / "src";
-    AbsolutePath OutputDirectory => RootDirectory / "output";
-    AbsolutePath NexusModsOutputDirectory => OutputDirectory / "NexusMods";
-    AbsolutePath ThunderStoreOutputDirectory => OutputDirectory / "ThunderStore";
-    AbsolutePath ArchiveDirectory => RootDirectory / "_tmp";
-    AbsolutePath NexusModsDistDirectory => RootDirectory / "dist" / "NexusMods";
-    AbsolutePath NexusModsChangelog => NexusModsDistDirectory / "CHANGELOG.txt";
-    AbsolutePath ThunderStoreDistDirectory => RootDirectory / "dist" / "ThunderStore";
-    AbsolutePath ThunderStoreChangelog => ThunderStoreDistDirectory / "CHANGELOG.md";
+    
+    static AbsolutePath MainChangelog => RootDirectory / "CHANGELOG.md";
+    static AbsolutePath SourceDirectory => RootDirectory / "src";
+    static AbsolutePath OutputDirectory => RootDirectory / "output";
+    static AbsolutePath NexusModsOutputDirectory => OutputDirectory / "NexusMods";
+    static AbsolutePath ThunderStoreOutputDirectory => OutputDirectory / "ThunderStore";
+    static AbsolutePath ArchiveDirectory => RootDirectory / "_tmp";
+    static AbsolutePath NexusModsDistDirectory => RootDirectory / "dist" / "NexusMods";
+    static AbsolutePath NexusModsChangelog => NexusModsDistDirectory / "CHANGELOG.txt";
+    static AbsolutePath ThunderStoreDistDirectory => RootDirectory / "dist" / "ThunderStore";
+    static AbsolutePath ThunderStoreChangelog => ThunderStoreDistDirectory / "CHANGELOG.md";
 
     AbsolutePath PluginsDirectory =>
         AbsolutePath.Create(Path.Combine(GamePath, BepinexPath));
 
-    AbsolutePath BuildDirectory => SourceDirectory / "bin" / BuildConfig / ProjectTargetFramework;
     string CompiledFileName => AegirProject.Name + ".dll";
+    string PackedFileName => AegirProject.Name + "-" + AegirProject.GetProperty("version") + ".zip";
+    
+    AbsolutePath BuildDirectory => SourceDirectory / "bin" / BuildConfig / ProjectTargetFramework;
     AbsolutePath CompiledFilePath => BuildDirectory / CompiledFileName;
     AbsolutePath CompiledPluginPath => PluginsDirectory / CompiledFileName;
-    string PackedFileName => AegirProject.Name + "-" + AegirProject.GetProperty("version") + ".zip";
 
     Target Clean => _ => _
         .Description("Clean build and output directories")
@@ -124,7 +128,7 @@ class Build : NukeBuild
 
             NexusModsChangelog
                 .TouchFile()
-                .WriteAllLines(changelog, UTF8NoBom);
+                .WriteAllLines(changelog, Utf8NoBom);
 
             ArchiveDirectory.CreateOrCleanDirectory();
 
@@ -152,7 +156,7 @@ class Build : NukeBuild
 
             ThunderStoreChangelog
                 .TouchFile()
-                .WriteAllLines(changelog, UTF8NoBom);
+                .WriteAllLines(changelog, Utf8NoBom);
 
             ArchiveDirectory.CreateOrCleanDirectory();
 
