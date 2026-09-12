@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Build">
 
   <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>12</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>embedded</DebugType>
     <AssemblyName>Aegir</AssemblyName>
     <Product>Aegir</Product>
     <Description>Simple mod for disabling water camera clipping</Description>
-    <Version>1.4.0</Version>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>latest</LangVersion>
-    <DebugType>embedded</DebugType>
+    <Version>1.5.0</Version>
     <RestoreAdditionalProjectSources>
       https://api.nuget.org/v3/index.json;
       https://nuget.bepinex.dev/v3/index.json;
