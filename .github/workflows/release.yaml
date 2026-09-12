@@ -66,6 +66,7 @@ jobs:
     uses: ./.github/workflows/build-project.yaml
     with:
       target-ref: 'main'
+      build-conf: 'Release'
 
   github-release:
     needs: [ build, check-tag ]
