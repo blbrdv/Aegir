@@ -92,7 +92,7 @@ jobs:
           echo "value=$value" >> "$GITHUB_OUTPUT"
   
       - name: Build project
-        run: ./run.sh compile --game-path "${{ steps.game-path.outputs.value }}"
+        run: ./run.sh compile --build-config ${{ inputs.build-conf }} --game-path "${{ steps.game-path.outputs.value }}"
   
       - name: Upload build
         uses: actions/upload-artifact@v6
