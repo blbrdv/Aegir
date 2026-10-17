@@ -60,8 +60,6 @@ jobs:
           END
           )
           echo "$manifest" > ${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ env.GAME_ID }}.acf
-          set -x
-          find "${{ steps.steamcmd.outputs.directory }}/steamapps/common"
           cat "${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ env.GAME_ID }}.acf"
   
       - name: Download game
@@ -81,9 +79,6 @@ jobs:
               sleep 5
             fi 
           done
-          
-          set -x
-          find "${{ steps.game-path.outputs.value }}" -type d
   
       - name: Restore project
         run: ./run.sh restore
