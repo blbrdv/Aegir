@@ -159,6 +159,11 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: plugin-${{ github.sha }}
+      
+      - name: Get changelog for current version
+      - id: current-changelog
+        run: |
+          echo "value=$(cat ${{ github.workspace }}/dist/NexusMods/CHANGELOG.${{ needs.check-tag.outputs.version }}.txt)" >> "$GITHUB_OUTPUT"
 
       - name: Publish to NexusMods
         uses: Nexus-Mods/upload-action@v1.0.0-beta.11
@@ -170,4 +175,5 @@ jobs:
           name: ${{ env.Name }}
           primary_mod_manager_download: true
           show_requirements_pop_up: true
+          changelog: ${{ steps.current-changelog.outputs.value }}
     
