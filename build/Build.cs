@@ -16,23 +16,29 @@ using Solution = Fallout.Common.ProjectModel.Solution;
 // ReSharper disable AllUnderscoreLocalParameterName
 // ReSharper disable UnusedMember.Local
 
+// ReSharper disable once ArrangeTypeModifiers
 class Build : FalloutBuild
 {
+    // ReSharper disable once ConvertToConstant.Local
+    // ReSharper disable once InconsistentNaming
     [Parameter("Path to the BepInEx plugin folder, default is 'BepInEx\\plugins'")]
-    readonly string _bepinexPath = @"BepInEx\plugins";
+    readonly string BepinexPath = @"BepInEx\plugins";
 
+    // ReSharper disable once InconsistentNaming
     [Parameter("Configuration to build, default is 'Debug'")]
-    readonly Configuration _buildConfig = Configuration.Debug;
+    readonly Configuration BuildConfig = Configuration.Debug;
 
+    // ReSharper disable once InconsistentNaming
     [Parameter("Path to the root of game folder")] 
-    readonly string _gamePath;
+    readonly string GamePath;
 
+    // ReSharper disable once InconsistentNaming
     [Fallout.Common.ProjectModel.Solution(GenerateProjects = true)] 
-    readonly Solution _solution;
+    readonly Solution Solution;
 
     readonly Encoding _utf8NoBom = new UTF8Encoding(false);
 
-    Project AegirProject => _solution.GetProject("Aegir");
+    Project AegirProject => Solution.GetProject("Aegir");
     string ProjectTargetFramework => AegirProject.GetTargetFrameworks()!.First();
     string CompiledFileName => AegirProject.Name + ".dll";
     string PackedFileName => AegirProject.Name + "-" + AegirProject.GetProperty("version") + ".zip";
@@ -52,9 +58,9 @@ class Build : FalloutBuild
     static AbsolutePath ThunderStoreConfigFile => ThunderStoreDistDirectory / "thunderstore.toml";
 
     AbsolutePath PluginsDirectory =>
-        AbsolutePath.Create(Path.Combine(_gamePath, _bepinexPath));
+        AbsolutePath.Create(Path.Combine(GamePath, BepinexPath));
     
-    AbsolutePath BuildDirectory => SourceDirectory / "bin" / _buildConfig / ProjectTargetFramework;
+    AbsolutePath BuildDirectory => SourceDirectory / "bin" / BuildConfig / ProjectTargetFramework;
     AbsolutePath CompiledFilePath => BuildDirectory / CompiledFileName;
     AbsolutePath CompiledPluginPath => PluginsDirectory / CompiledFileName;
 
@@ -76,7 +82,7 @@ class Build : FalloutBuild
 
     Target Restore => _ => _
         .Description("Look for and download project dependencies")
-        .Requires(() => _buildConfig)
+        .Requires(() => BuildConfig)
         .Before(Compile)
         .After(Clean)
         .Executes(() =>
@@ -87,8 +93,8 @@ class Build : FalloutBuild
 
     Target Compile => _ => _
         .Description("Build project")
-        .Requires(() => _buildConfig)
-        .Requires(() => _gamePath)
+        .Requires(() => BuildConfig)
+        .Requires(() => GamePath)
         .Before(PackForNexusmods)
         .Before(PackForThunderstore)
         .After(Restore)
@@ -96,8 +102,8 @@ class Build : FalloutBuild
         {
             DotNetBuild(s => s
                 .SetProjectFile(AegirProject)
-                .SetConfiguration(_buildConfig)
-                .AddProperty("GamePath", _gamePath)
+                .SetConfiguration(BuildConfig)
+                .AddProperty("GamePath", GamePath)
                 .EnableNoRestore());
         });
 
