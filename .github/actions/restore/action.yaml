@@ -8,6 +8,8 @@ runs:
       id: nuget
       shell: bash
       run: |
+        set -x
+        
         nl=$'\n'
         output="$(dotnet nuget locals all --list --force-english-output)"
         r="[^ $nl]+ ([^$nl]+)"
@@ -27,13 +29,9 @@ runs:
           fi
         done
         
-        echo "Nuget paths:"
-        echo "$paths"
         echo "paths<<EOF" >> "$GITHUB_OUTPUT"
         echo "$paths" >> "$GITHUB_OUTPUT"
         echo "EOF" >> "$GITHUB_OUTPUT"
-        echo "As list:"
-        echo "$list"
         echo "list=$list" >> "$GITHUB_OUTPUT"
 
     - uses: actions/cache@v6.1.0

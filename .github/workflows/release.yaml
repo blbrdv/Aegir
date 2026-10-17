@@ -51,6 +51,8 @@ jobs:
       - name: Get project properties
         id: props
         run: |
+          set -x
+          
           mapfile -t info < <(dotnet msbuild ${{ github.workspace }}/src \
             -getProperty:Product,Authors,Description,Version,GameTitle \
             | jq .Properties[])
@@ -66,6 +68,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          set -x
+          
           tag="v${{ steps.props.outputs.version }}"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           
@@ -179,6 +183,8 @@ jobs:
       - name: Get changelog for current version
         id: current-changelog
         run: |
+          set -x
+          
           echo "value=$(cat ${{ github.workspace }}/dist/NexusMods/CHANGELOG.${{ needs.meta.outputs.version }}.txt)" >> "$GITHUB_OUTPUT"
 
       - name: Publish to NexusMods

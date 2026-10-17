@@ -38,12 +38,14 @@ jobs:
       - name: Set target ref
         id: ref
         run: |
+          set -x
+          
           if [[ "true" == "${{ inputs.target-ref == '' }}" ]]; then
             ref="${{ github.ref }}"
           else
             ref="${{ inputs.target-ref }}"
           fi
-          echo "Ref is $ref"
+          
           echo "target-ref=$ref" >> "$GITHUB_OUTPUT"
 
   build:

@@ -42,6 +42,8 @@ jobs:
       - name: Get project properties
         id: props
         run: |
+          set -x
+          
           mapfile -t info < <(dotnet msbuild ${{ github.workspace }}/src \
             -getProperty:TargetFramework,Product,GameTitle,GameId \
             | jq .Properties[])
@@ -56,6 +58,8 @@ jobs:
       # Little hack to let Steam think that we own this game
       - name: Create Steam manifest file
         run: |
+          set -x
+          
           mkdir -p "${{ steps.props.outputs.game-path }}"
           manifest=$(cat <<-END
             "AppState"
@@ -68,15 +72,15 @@ jobs:
           END
           )
           echo "$manifest" > ${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ steps.props.outputs.game-id }}.acf
-          cat "${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ steps.props.outputs.game-id }}.acf"
   
       - name: Download game
         id: download
         run: |
+          set -x
+          
           s=0
           n=1
           until [ "$n" -ge 4 ]; do
-            echo "Attempt #$n"
             steamcmd \
               +force_install_dir "${{ steps.props.outputs.game-path }}" \
               +login anonymous \
