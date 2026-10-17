@@ -67,7 +67,7 @@ jobs:
           
           for name in $tags
           do
-            if [ "$name" == "$tag" ]; then
+            if [[ "$name" == "$tag" ]]; then
               echo "Tag '$tag' already exists. Update project version."
               exit 1
             fi
