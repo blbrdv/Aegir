@@ -161,7 +161,7 @@ jobs:
           name: plugin-${{ github.sha }}
       
       - name: Get changelog for current version
-      - id: current-changelog
+        id: current-changelog
         run: |
           echo "value=$(cat ${{ github.workspace }}/dist/NexusMods/CHANGELOG.${{ needs.check-tag.outputs.version }}.txt)" >> "$GITHUB_OUTPUT"
 
