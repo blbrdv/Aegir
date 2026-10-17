@@ -36,7 +36,7 @@ class Build : FalloutBuild
     [Fallout.Common.ProjectModel.Solution(GenerateProjects = true)] 
     readonly Solution Solution;
 
-    readonly Encoding Utf8NoBom = new UTF8Encoding(false);
+    readonly Encoding _utf8NoBom = new UTF8Encoding(false);
 
     Project AegirProject => Solution.GetProject("Aegir");
     string ProjectTargetFramework => AegirProject.GetTargetFrameworks()!.First();
@@ -146,11 +146,11 @@ class Build : FalloutBuild
 
             NexusModsChangelog
                 .TouchFile()
-                .WriteAllLines(nexusChangelog, Utf8NoBom);
+                .WriteAllLines(nexusChangelog, _utf8NoBom);
             
             currentChangelogFile
                 .TouchFile()
-                .WriteAllLines(changelogCurrent, Utf8NoBom);
+                .WriteAllLines(changelogCurrent, _utf8NoBom);
             
             CompiledFilePath.CopyToDirectory(ArchiveDirectory);
             
@@ -179,7 +179,7 @@ class Build : FalloutBuild
 
             ThunderStoreChangelog
                 .TouchFile()
-                .WriteAllLines(changelog, Utf8NoBom);
+                .WriteAllLines(changelog, _utf8NoBom);
 
             var currentVersion = AegirProject.GetProperty("version");
             
