@@ -51,7 +51,7 @@ Run `./run.sh <target> <params...>` (or `.\run.ps1` for Windows)
 #### Usage:
 
 ```
-Targets (with their direct dependencies):                                                                                                                            
+Targets (with their direct dependencies):
 
   Clean               
     Clean build and output directories

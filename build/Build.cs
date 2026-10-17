@@ -1,11 +1,8 @@
-using System;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using Fallout.Common;
 using Fallout.Common.IO;
-using Fallout.Common.Tooling;
 using Fallout.Common.Tools.DotNet;
 using Fallout.Common.Utilities.Collections;
 using Fallout.Solutions;
@@ -15,26 +12,27 @@ using Tomlyn.Model;
 using static Fallout.Common.Tools.DotNet.DotNetTasks;
 using Solution = Fallout.Common.ProjectModel.Solution;
 
+// ReSharper disable ArrangeTypeMemberModifiers
 // ReSharper disable AllUnderscoreLocalParameterName
 // ReSharper disable UnusedMember.Local
 
 class Build : FalloutBuild
 {
     [Parameter("Path to the BepInEx plugin folder, default is 'BepInEx\\plugins'")]
-    readonly string BepinexPath = @"BepInEx\plugins";
+    readonly string _bepinexPath = @"BepInEx\plugins";
 
     [Parameter("Configuration to build, default is 'Debug'")]
-    readonly Configuration BuildConfig = Configuration.Debug;
+    readonly Configuration _buildConfig = Configuration.Debug;
 
     [Parameter("Path to the root of game folder")] 
-    readonly string GamePath;
+    readonly string _gamePath;
 
     [Fallout.Common.ProjectModel.Solution(GenerateProjects = true)] 
-    readonly Solution Solution;
+    readonly Solution _solution;
 
-    readonly Encoding Utf8NoBom = new UTF8Encoding(false);
+    readonly Encoding _utf8NoBom = new UTF8Encoding(false);
 
-    Project AegirProject => Solution.GetProject("Aegir");
+    Project AegirProject => _solution.GetProject("Aegir");
     string ProjectTargetFramework => AegirProject.GetTargetFrameworks()!.First();
     string CompiledFileName => AegirProject.Name + ".dll";
     string PackedFileName => AegirProject.Name + "-" + AegirProject.GetProperty("version") + ".zip";
@@ -54,9 +52,9 @@ class Build : FalloutBuild
     static AbsolutePath ThunderStoreConfigFile => ThunderStoreDistDirectory / "thunderstore.toml";
 
     AbsolutePath PluginsDirectory =>
-        AbsolutePath.Create(Path.Combine(GamePath, BepinexPath));
+        AbsolutePath.Create(Path.Combine(_gamePath, _bepinexPath));
     
-    AbsolutePath BuildDirectory => SourceDirectory / "bin" / BuildConfig / ProjectTargetFramework;
+    AbsolutePath BuildDirectory => SourceDirectory / "bin" / _buildConfig / ProjectTargetFramework;
     AbsolutePath CompiledFilePath => BuildDirectory / CompiledFileName;
     AbsolutePath CompiledPluginPath => PluginsDirectory / CompiledFileName;
 
@@ -68,17 +66,17 @@ class Build : FalloutBuild
             var buildDirs = SourceDirectory.GlobDirectories("**/bin", "**/obj");
             if (buildDirs.Count > 0)
             {
-                Log.Information("Removing dirs [{0}]", string.Join(", ", buildDirs));
+                Log.Information("Removing dirs [{Dirs}]", string.Join(", ", buildDirs));
                 buildDirs.DeleteDirectories();
             }
 
-            Log.Information("Removing {0}", OutputDirectory);
+            Log.Information("Removing {Directory}", OutputDirectory);
             OutputDirectory.CreateOrCleanDirectory();
         });
 
     Target Restore => _ => _
         .Description("Look for and download project dependencies")
-        .Requires(() => BuildConfig)
+        .Requires(() => _buildConfig)
         .Before(Compile)
         .After(Clean)
         .Executes(() =>
@@ -89,8 +87,8 @@ class Build : FalloutBuild
 
     Target Compile => _ => _
         .Description("Build project")
-        .Requires(() => BuildConfig)
-        .Requires(() => GamePath)
+        .Requires(() => _buildConfig)
+        .Requires(() => _gamePath)
         .Before(PackForNexusmods)
         .Before(PackForThunderstore)
         .After(Restore)
@@ -98,8 +96,8 @@ class Build : FalloutBuild
         {
             DotNetBuild(s => s
                 .SetProjectFile(AegirProject)
-                .SetConfiguration(BuildConfig)
-                .AddProperty("GamePath", GamePath)
+                .SetConfiguration(_buildConfig)
+                .AddProperty("GamePath", _gamePath)
                 .EnableNoRestore());
         });
 
@@ -125,6 +123,9 @@ class Build : FalloutBuild
             
             var currentVersion = AegirProject.GetProperty("version");
             var changelog = MainChangelog.ReadAllLines()[1..];
+
+            var packedFile = NexusModsOutputDirectory / PackedFileName;
+            var currentChangelogFile = NexusModsDistDirectory / $"CHANGELOG.{currentVersion}.txt";
             
             var changelogCurrent = changelog[3..]
                 .TakeUntil(line => line.StartsWith("## "))
@@ -139,13 +140,11 @@ class Build : FalloutBuild
 
             NexusModsChangelog
                 .TouchFile()
-                .WriteAllLines(nexusChangelog, Utf8NoBom);
+                .WriteAllLines(nexusChangelog, _utf8NoBom);
             
-            AbsolutePath.Create(NexusModsDistDirectory / $"CHANGELOG.{currentVersion}.txt")
+            currentChangelogFile
                 .TouchFile()
-                .WriteAllLines(changelogCurrent, Utf8NoBom);
-
-            var packedFile = AbsolutePath.Create(NexusModsOutputDirectory / PackedFileName);
+                .WriteAllLines(changelogCurrent, _utf8NoBom);
             
             CompiledFilePath.CopyToDirectory(ArchiveDirectory);
             
@@ -155,6 +154,7 @@ class Build : FalloutBuild
                 .WhereNot(file => file.Name.Equals("CHANGELOG.part.txt"))
                 .ForEach(file => file.CopyToDirectory(NexusModsOutputDirectory));
             
+            currentChangelogFile.DeleteFile();
             NexusModsChangelog.DeleteFile();
             ArchiveDirectory.DeleteDirectory();
 
@@ -173,7 +173,7 @@ class Build : FalloutBuild
 
             ThunderStoreChangelog
                 .TouchFile()
-                .WriteAllLines(changelog, Utf8NoBom);
+                .WriteAllLines(changelog, _utf8NoBom);
 
             var currentVersion = AegirProject.GetProperty("version");
             
@@ -203,6 +203,9 @@ class Build : FalloutBuild
             }
 
             DotNet($"tcli build --config-path {ThunderStoreConfigFile} --package-version {currentVersion}");
+            
+            ThunderStoreChangelog.DeleteFile();
+            ThunderStoreConfigFile.DeleteFile();
             
             Log.Information("Packed files to {Target}", ThunderStoreOutputDirectory);
         });
