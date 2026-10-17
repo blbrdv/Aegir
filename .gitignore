@@ -58,10 +58,16 @@ nunit-*.xml
 
 # build
 .fake
-.nuke/temp
+.fallout/temp
 
 # zip release directory
 output
 _temp
 
 dist/**/CHANGELOG.*
+!dist/NexusMods/CHANGELOG.part.txt
+dist/Aegir.dll
+dist/ThunderStore/thunderstore.toml
+
+# Act config file
+.actrc

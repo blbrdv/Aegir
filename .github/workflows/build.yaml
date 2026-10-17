@@ -13,7 +13,8 @@ on:
     paths:
       - '.github/workflows/build.yaml'
       - '.github/workflows/build-project.yaml'
-      - '.nuke/**'
+      - '.github/actions/restore/action.yaml'
+      - '.fallout/**'
       - 'build/**'
       - 'dist/**'
       - 'src/**'
@@ -26,9 +27,9 @@ env:
 
 jobs:
   target:
-    runs-on: ubuntu-latest
+    name: 'Set target ref'
 
-    name: Set target ref
+    runs-on: ubuntu-latest
 
     outputs:
       target-ref: ${{ steps.ref.outputs.target-ref }}
@@ -47,6 +48,8 @@ jobs:
 
   build:
     needs: target
+
+    name: 'Build'
 
     uses: ./.github/workflows/build-project.yaml
     with:

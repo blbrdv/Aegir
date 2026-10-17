@@ -7,6 +7,7 @@
     <DebugType>embedded</DebugType>
     <AssemblyName>Aegir</AssemblyName>
     <Product>Aegir</Product>
+    <Authors>blbrdv</Authors>
     <Description>Simple mod for disabling water camera clipping</Description>
     <Version>1.5.0</Version>
     <RestoreAdditionalProjectSources>

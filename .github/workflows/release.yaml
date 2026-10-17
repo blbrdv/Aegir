@@ -2,18 +2,26 @@ name: Release
 
 on:
   workflow_dispatch:
+    inputs: 
+      github:
+        type: boolean
+        default: false
+        description: Release project to GitHub Releases
+      thunderstore:
+        type: boolean
+        default: false
+        description: Release project to ThunderStore
+      nexusmods:
+        type: boolean
+        default: false
+        description: Release project to NexusMods
   push:
     branches:
       - 'main'
     paths:
-      - '.github/workflows/release.yaml'
-      - '.github/workflows/build-project.yaml'
-      - '.nuke/**'
-      - 'build/**'
       - 'dist/**'
       - 'src/**'
       - 'Aegir.sln'
-      - 'run.*'
       - 'global.json'
 
 env:
@@ -23,82 +31,144 @@ env:
 
 jobs:
   check-tag:
-    runs-on: windows-latest
-
-    name: Check release tag existence
-
+    name: 'Check release tag existence'
+    
+    runs-on: ubuntu-latest
+    
     outputs:
       tag: ${{ steps.check.outputs.tag }}
       version: ${{ steps.check.outputs.version }}
-
+    
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
 
       - name: Checking tag
         id: check
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $XML = [Xml] (Get-Content ${{ github.workspace }}\src\${{ env.Name }}.csproj);
-          $CurrentVersion = [Version] $XML.Project.PropertyGroup.Version;
-          echo "Current version: $CurrentVersion";
-          echo "Current tag: v$CurrentVersion";
-          echo "tag=v$CurrentVersion" >> $env:GITHUB_OUTPUT;
-          echo "version=$CurrentVersion" >> $env:GITHUB_OUTPUT;
-          $Response = gh api `
-            -H "Accept: application/vnd.github+json" `
-            -H "X-GitHub-Api-Version: 2022-11-28" `
-            /repos/blbrdv/${{ env.Name }}/tags `
-            | ConvertFrom-Json;
+          version=$(dotnet msbuild "${{ github.workspace }}/src/Aegir.csproj" -getProperty:Version)
+          tag="v$version"
+          echo "Current version: $version";
+          echo "Current tag: $tag";
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
           
-          foreach ($Tag in $Response) {
-            if ($Tag.name -eq "v$CurrentVersion") {
-              echo "Tag 'v$CurrentVersion' already exists. Update project version.";
-              exit 1;
-            }
-          }
+          $tags=$(gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/blbrdv/${{ env.Name }}/tags \
+            | jq .[].name)
+          
+          for name in $tags
+          do
+            if [ "$name" == "$tag" ]; then
+              echo "Tag '$tag' already exists. Update project version."
+              exit 1
+            fi
+          done
 
   build:
+    name: 'Build'
+    
     needs: check-tag
-
-    name: Build project
 
     uses: ./.github/workflows/build-project.yaml
     with:
       target-ref: 'main'
       build-conf: 'Release'
+      upload: true
 
   github-release:
-    needs: [ build, check-tag ]
+    if: ${{ inputs.github && !github.event.act }}
 
-    name: Github release
+    name: 'Github release'
 
     runs-on: ubuntu-latest
+
+    needs: [ build, check-tag ]
 
     permissions:
       contents: write
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Download project artefact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: plugin-${{ github.sha }}
 
       - name: Parse changelog
         id: changelog_reader
-        uses: mindsers/changelog-reader-action@v2
+        uses: mindsers/changelog-reader-action@v2.4
         with:
           validation_level: warn
           version: ${{ needs.check-tag.outputs.version }}
           path: ${{ github.workspace }}/CHANGELOG.md
 
       - name: GitHub release
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@v1.21
         with:
           tag: ${{ needs.check-tag.outputs.tag }}
           body: ${{ steps.changelog_reader.outputs.changes }}
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: false
           artifacts: ${{ github.workspace }}/${{ env.Name }}.dll
+  
+  thunderstore-release:
+    if: ${{ inputs.thunderstore && !github.event.act }}
+
+    name: 'Thunderstore release'
+
+    runs-on: ubuntu-latest
+
+    needs: [ build, check-tag ]
+    
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download project artefact
+        uses: actions/download-artifact@v8
+        with:
+          name: plugin-${{ github.sha }}
+
+      - name: Publish to Thunderstore
+        uses: MaxtorCoder/thunderstore-publish@v1.0.2
+        with:
+          token: ${{ secrets.TS_TOKEN }}
+          file: ${{ github.workspace }}/output/ThunderStore/blbrdv-${{ env.Name }}-${{ needs.check-tag.outputs.version }}.zip
+  
+  nexusmods-release:
+    if: ${{ inputs.nexusmods && !github.event.act }}
+
+    name: 'NexusMods release'
+
+    runs-on: ubuntu-latest
+
+    needs: [ build, check-tag ]
+    
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download project artefact
+        uses: actions/download-artifact@v8
+        with:
+          name: plugin-${{ github.sha }}
+
+      - name: Publish to NexusMods
+        uses: Nexus-Mods/upload-action@v1.0.0-beta.11
+        with:
+          api_key: ${{ secrets.NEXUS_API_KEY }}
+          file_id: ${{ vars.NEXUS_FILE_ID }}
+          mod_id: ${{ vars.NEXUS_MOD_ID }}
+          filename: ${{ github.workspace }}/output/NexusMods/${{ env.Name }}-${{ needs.check-tag.outputs.version }}.zip
+          name: ${{ env.Name }}
+          primary_mod_manager_download: true
+          show_requirements_pop_up: true
+    
