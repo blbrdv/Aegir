@@ -7,9 +7,11 @@
     <DebugType>embedded</DebugType>
     <AssemblyName>Aegir</AssemblyName>
     <Product>Aegir</Product>
+    <Version>1.6.0</Version>
     <Authors>blbrdv</Authors>
     <Description>Simple mod for disabling water camera clipping</Description>
-    <Version>1.6.0</Version>
+    <GameTitle>Valheim</GameTitle>
+    <GameId>896660</GameId>
     <RestoreAdditionalProjectSources>
       https://api.nuget.org/v3/index.json;
       https://nuget.bepinex.dev/v3/index.json;

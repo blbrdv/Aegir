@@ -26,18 +26,20 @@ on:
 
 env:
   ContinuousIntegrationBuild: true
-  Game: valheim
-  Name: Aegir
 
 jobs:
-  check-tag:
-    name: 'Check release tag existence'
+  meta:
+    name: 'Get project info and check version'
     
     runs-on: ubuntu-latest
     
     outputs:
+      name: ${{ steps.props.outputs.name }}
+      author: ${{ steps.props.outputs.author }}
+      description: ${{ steps.props.outputs.description }}
+      version: ${{ steps.props.outputs.version }}
+      game-name: ${{ steps.props.outputs.game-name }}
       tag: ${{ steps.check.outputs.tag }}
-      version: ${{ steps.check.outputs.version }}
     
     steps:
       - uses: actions/checkout@v7
@@ -45,23 +47,32 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
+      
+      - name: Get project properties
+        id: props
+        run: |
+          mapfile -t info < <(dotnet msbuild ${{ github.workspace }}/src \
+            -getProperty:Product,Authors,Description,Version,GameTitle \
+            | jq .Properties[])
+          
+          echo "name=${info[0]}" >> "$GITHUB_OUTPUT"
+          echo "author=${info[1]}" >> "$GITHUB_OUTPUT"
+          echo "description=${info[2]}" >> "$GITHUB_OUTPUT"
+          echo "version=${info[3]}" >> "$GITHUB_OUTPUT"
+          echo "${info[4]}" | awk '{printf "%s=%s\n", "game-name", tolower($0)}' >> "$GITHUB_OUTPUT"
 
       - name: Checking tag
         id: check
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          version=$(dotnet msbuild "${{ github.workspace }}/src/Aegir.csproj" -getProperty:Version)
-          tag="v$version"
-          echo "Current version: $version";
-          echo "Current tag: $tag";
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+          tag="v${{ steps.props.outputs.version }}"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           
           mapfile -t tags < <(gh api \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/blbrdv/${{ env.Name }}/tags \
+            /repos/${{ steps.props.outputs.author }}/${{ steps.props.outputs.name }}/tags \
             | jq .[].name)
           
           for name in "${tags[@]}"
@@ -75,7 +86,7 @@ jobs:
   build:
     name: 'Build'
     
-    needs: check-tag
+    needs: meta
 
     uses: ./.github/workflows/build-project.yaml
     with:
@@ -90,7 +101,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    needs: [ build, check-tag ]
+    needs: [ build, meta ]
 
     permissions:
       contents: write
@@ -108,17 +119,17 @@ jobs:
         uses: mindsers/changelog-reader-action@v2.4
         with:
           validation_level: warn
-          version: ${{ needs.check-tag.outputs.version }}
+          version: ${{ needs.meta.outputs.version }}
           path: ${{ github.workspace }}/CHANGELOG.md
 
       - name: GitHub release
         uses: ncipollo/release-action@v1.21
         with:
-          tag: ${{ needs.check-tag.outputs.tag }}
+          tag: ${{ needs.meta.outputs.tag }}
           body: ${{ steps.changelog_reader.outputs.changes }}
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: false
-          artifacts: ${{ github.workspace }}/${{ env.Name }}.dll
+          artifacts: ${{ github.workspace }}/${{ needs.meta.outputs.name }}.dll
   
   thunderstore-release:
     if: ${{ inputs.thunderstore && !github.event.act }}
@@ -127,7 +138,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    needs: [ build, check-tag ]
+    needs: [ build, meta ]
     
     steps:
       - uses: actions/checkout@v7
@@ -141,7 +152,12 @@ jobs:
         uses: MaxtorCoder/thunderstore-publish@v1.0.2
         with:
           token: ${{ secrets.TS_TOKEN }}
-          file: ${{ github.workspace }}/output/ThunderStore/blbrdv-${{ env.Name }}-${{ needs.check-tag.outputs.version }}.zip
+          communities: ${{ needs.meta.outputs.game-name }}
+          namespace: ${{ needs.meta.outputs.author }}
+          name: ${{ needs.meta.outputs.name }}
+          description: ${{ needs.meta.outputs.description }}
+          version: ${{ needs.meta.outputs.version }}
+          file: ${{ github.workspace }}/output/ThunderStore/${{ needs.meta.outputs.author }}-${{ needs.meta.outputs.name }}-${{ needs.meta.outputs.version }}.zip
   
   nexusmods-release:
     if: ${{ inputs.nexusmods && !github.event.act }}
@@ -150,7 +166,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    needs: [ build, check-tag ]
+    needs: [ build, meta ]
     
     steps:
       - uses: actions/checkout@v7
@@ -163,16 +179,16 @@ jobs:
       - name: Get changelog for current version
         id: current-changelog
         run: |
-          echo "value=$(cat ${{ github.workspace }}/dist/NexusMods/CHANGELOG.${{ needs.check-tag.outputs.version }}.txt)" >> "$GITHUB_OUTPUT"
+          echo "value=$(cat ${{ github.workspace }}/dist/NexusMods/CHANGELOG.${{ needs.meta.outputs.version }}.txt)" >> "$GITHUB_OUTPUT"
 
       - name: Publish to NexusMods
         uses: Nexus-Mods/upload-action@v1.0.0-beta.11
         with:
           api_key: ${{ secrets.NEXUS_API_KEY }}
-          file_id: ${{ vars.NEXUS_FILE_ID }}
-          mod_id: ${{ vars.NEXUS_MOD_ID }}
-          filename: ${{ github.workspace }}/output/NexusMods/${{ env.Name }}-${{ needs.check-tag.outputs.version }}.zip
-          name: ${{ env.Name }}
+          file_id: ${{ secrets.NEXUS_FILE_ID }}
+          mod_id: ${{ secrets.NEXUS_MOD_ID }}
+          filename: ${{ github.workspace }}/output/NexusMods/${{ needs.meta.outputs.name }}-${{ needs.meta.outputs.version }}.zip
+          display_name: ${{ needs.meta.outputs.name }}
           primary_mod_manager_download: true
           show_requirements_pop_up: true
           changelog: ${{ steps.current-changelog.outputs.value }}

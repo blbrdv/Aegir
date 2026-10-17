@@ -14,33 +14,13 @@ on:
         required: false
         type: boolean
         default: false
-    outputs:
-      tfm:
-        value: ${{ jobs.build-project.outputs.tfm }}
-      name:
-        value: ${{ jobs.build-project.outputs.name }}
-      author:
-        value: ${{ jobs.build-project.outputs.author }}
-      description:
-        value: ${{ jobs.build-project.outputs.description }}
-      version:
-        value: ${{ jobs.build-project.outputs.version }}
 
 env:
-  GAME_ID: 896660
-  GAME_NAME: Valheim dedicated server
   ContinuousIntegrationBuild: true
 
 jobs:
   build-project:
     runs-on: ubuntu-latest
-    
-    outputs:
-      tfm: ${{ steps.meta.outputs.tfm }}
-      name: ${{ steps.meta.outputs.name }}
-      author: ${{ steps.meta.outputs.author }}
-      description: ${{ steps.meta.outputs.description }}
-      version: ${{ steps.meta.outputs.version }}
     
     steps:
       - uses: actions/checkout@v7
@@ -51,34 +31,44 @@ jobs:
 
       - name: Dotnet restore
         uses: ./.github/actions/restore
-      
+
       - name: Install SteamCMD
         id: steamcmd
         uses: CyberAndrii/setup-steamcmd@v1.3.0
-  
-      - name: Set game path
-        id: game-path
+
+      - name: Restore project
+        run: ./run.sh restore
+
+      - name: Get project properties
+        id: props
         run: |
-          value="${{ steps.steamcmd.outputs.directory }}/steamapps/common/${{ env.GAME_NAME }}"
-          echo "Game path is $value"
-          echo "value=$value" >> "$GITHUB_OUTPUT"
+          mapfile -t info < <(dotnet msbuild ${{ github.workspace }}/src \
+            -getProperty:TargetFramework,Product,GameTitle,GameId \
+            | jq .Properties[])
+          
+          echo "tfm=${info[0]}" >> "$GITHUB_OUTPUT"
+          echo "name=${info[1]}" >> "$GITHUB_OUTPUT"
+          game_name="${info[2]}"
+          echo "game-name=$game_name" >> "$GITHUB_OUTPUT"
+          echo "game-id=${info[3]}" >> "$GITHUB_OUTPUT"
+          echo "game-path=${{ steps.steamcmd.outputs.directory }}/steamapps/common/$game_name" >> "$GITHUB_OUTPUT"
   
       # Little hack to let Steam think that we own this game
       - name: Create Steam manifest file
         run: |
-          mkdir -p "${{ steps.game-path.outputs.value }}"
+          mkdir -p "${{ steps.props.outputs.game-path }}"
           manifest=$(cat <<-END
             "AppState"
             {
-              "appid" "${{ env.GAME_ID }}"
+              "appid" "${{ steps.props.outputs.game-id }}"
               "Universe" "1"
-              "installdir" "${{ env.GAME_NAME }}"
+              "installdir" "${{ steps.props.outputs.game-name }}"
               "StateFlags" "6"
             }
           END
           )
-          echo "$manifest" > ${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ env.GAME_ID }}.acf
-          cat "${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ env.GAME_ID }}.acf"
+          echo "$manifest" > ${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ steps.props.outputs.game-id }}.acf
+          cat "${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ steps.props.outputs.game-id }}.acf"
   
       - name: Download game
         id: download
@@ -87,7 +77,13 @@ jobs:
           n=1
           until [ "$n" -ge 4 ]; do
             echo "Attempt #$n"
-            steamcmd +force_install_dir "${{ steps.game-path.outputs.value }}" +login anonymous +app_update ${{ env.GAME_ID }} validate +quit && break || s=$?
+            steamcmd \
+              +force_install_dir "${{ steps.props.outputs.game-path }}" \
+              +login anonymous \
+              +app_update ${{ steps.props.outputs.game-id }} validate \
+              +quit \
+              && break \
+              || s=$?
             if [ "$s" -eq 8 ]; then
               n=$((n+1))
             else
@@ -98,32 +94,15 @@ jobs:
             fi 
           done
   
-      - name: Restore project
-        run: ./run.sh restore
-      
-      - name: Get project meta info
-        id: meta
-        run: |
-          mapfile -t values < <(dotnet msbuild "${{ github.workspace }}/src/Aegir.csproj" \
-            -getProperty:TargetFramework,Product,Authors,Description,Version \
-            | jq .Properties[])
-          
-          echo "Values: ${values[@]}"
-          echo "tfm=${values[0]}" >> "$GITHUB_OUTPUT"
-          echo "name=${values[1]}" >> "$GITHUB_OUTPUT"
-          echo "author=${values[2]}" >> "$GITHUB_OUTPUT"
-          echo "description=${values[3]}" >> "$GITHUB_OUTPUT"
-          echo "version=${values[4]}" >> "$GITHUB_OUTPUT"
-  
       - name: Build project
-        run: ./run.sh compile --build-config ${{ inputs.build-conf }} --game-path "${{ steps.game-path.outputs.value }}"
+        run: ./run.sh compile --build-config ${{ inputs.build-conf }} --game-path "${{ steps.props.outputs.game-path }}"
   
       - name: Upload build
         if: ${{ inputs.upload }}
         uses: actions/upload-artifact@v7
         with:
           name: plugin-${{ github.sha }}
-          path: ${{ github.workspace }}/src/bin/${{ inputs.build-conf }}/${{ steps.meta.outputs.tfm }}/Aegir.dll
+          path: ${{ github.workspace }}/src/bin/${{ inputs.build-conf }}/${{ steps.props.outputs.tfm }}/${{ steps.props.outputs.name }}.dll
           compression-level: 0
           retention-days: 1
           if-no-files-found: error
