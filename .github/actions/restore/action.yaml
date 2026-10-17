@@ -36,7 +36,7 @@ runs:
         echo "$list"
         echo "list=$list" >> "$GITHUB_OUTPUT"
 
-    - uses: actions/cache@v6.1
+    - uses: actions/cache@v6.1.0
       with:
         path: |
           ${{ steps.nuget.outputs.paths }}
