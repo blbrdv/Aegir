@@ -13,7 +13,8 @@ on:
     paths:
       - '.github/workflows/build.yaml'
       - '.github/workflows/build-project.yaml'
-      - '.nuke/**'
+      - '.github/actions/restore/action.yaml'
+      - '.fallout/**'
       - 'build/**'
       - 'dist/**'
       - 'src/**'

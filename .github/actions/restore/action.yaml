@@ -41,7 +41,7 @@ runs:
         path: |
           ${{ steps.nuget.outputs.paths }}
           ${{ github.workspace }}/build/obj
-        key: build-${{ hashFiles(steps.nuget.outputs.list, 'global.json', './.nuke/**', './build/**', '!./build/obj/**') }}
+        key: build-${{ hashFiles(steps.nuget.outputs.list, 'global.json', './.fallout/**', './build/**', '!./build/obj/**') }}
         restore-keys: build-
         enableCrossOsArchive: true
 

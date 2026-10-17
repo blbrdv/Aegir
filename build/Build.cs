@@ -1,18 +1,24 @@
+using System;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Nuke.Common;
-using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
-using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Utilities.Collections;
+using Fallout.Common;
+using Fallout.Common.IO;
+using Fallout.Common.Tooling;
+using Fallout.Common.Tools.DotNet;
+using Fallout.Common.Utilities.Collections;
+using Fallout.Solutions;
 using Serilog;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
+using Tomlyn;
+using Tomlyn.Model;
+using static Fallout.Common.Tools.DotNet.DotNetTasks;
+using Solution = Fallout.Common.ProjectModel.Solution;
 
 // ReSharper disable AllUnderscoreLocalParameterName
 // ReSharper disable UnusedMember.Local
 
-class Build : NukeBuild
+class Build : FalloutBuild
 {
     [Parameter("Path to the BepInEx plugin folder, default is 'BepInEx\\plugins'")]
     readonly string BepinexPath = @"BepInEx\plugins";
@@ -23,13 +29,15 @@ class Build : NukeBuild
     [Parameter("Path to the root of game folder")] 
     readonly string GamePath;
 
-    [Solution(GenerateProjects = true)] 
+    [Fallout.Common.ProjectModel.Solution(GenerateProjects = true)] 
     readonly Solution Solution;
 
     readonly Encoding Utf8NoBom = new UTF8Encoding(false);
 
-    Project AegirProject => Solution.Aegir; // just ignore CS1061, it's fine
+    Project AegirProject => Solution.GetProject("Aegir");
     string ProjectTargetFramework => AegirProject.GetTargetFrameworks()!.First();
+    string CompiledFileName => AegirProject.Name + ".dll";
+    string PackedFileName => AegirProject.Name + "-" + AegirProject.GetProperty("version") + ".zip";
     
     static AbsolutePath MainChangelog => RootDirectory / "CHANGELOG.md";
     static AbsolutePath SourceDirectory => RootDirectory / "src";
@@ -39,14 +47,14 @@ class Build : NukeBuild
     static AbsolutePath ArchiveDirectory => RootDirectory / "_tmp";
     static AbsolutePath NexusModsDistDirectory => RootDirectory / "dist" / "NexusMods";
     static AbsolutePath NexusModsChangelog => NexusModsDistDirectory / "CHANGELOG.txt";
+    static AbsolutePath NexusModsPartChangelog => NexusModsDistDirectory / "CHANGELOG.part.txt";
     static AbsolutePath ThunderStoreDistDirectory => RootDirectory / "dist" / "ThunderStore";
     static AbsolutePath ThunderStoreChangelog => ThunderStoreDistDirectory / "CHANGELOG.md";
+    static AbsolutePath ThunderStorePartConfigFile => ThunderStoreDistDirectory / "thunderstore.part.toml";
+    static AbsolutePath ThunderStoreConfigFile => ThunderStoreDistDirectory / "thunderstore.toml";
 
     AbsolutePath PluginsDirectory =>
         AbsolutePath.Create(Path.Combine(GamePath, BepinexPath));
-
-    string CompiledFileName => AegirProject.Name + ".dll";
-    string PackedFileName => AegirProject.Name + "-" + AegirProject.GetProperty("version") + ".zip";
     
     AbsolutePath BuildDirectory => SourceDirectory / "bin" / BuildConfig / ProjectTargetFramework;
     AbsolutePath CompiledFilePath => BuildDirectory / CompiledFileName;
@@ -112,32 +120,41 @@ class Build : NukeBuild
         .After(Compile)
         .Executes(() =>
         {
-            var changelog = new[]
-                {
-                    "-------------------------------------------------------------------------------",
-                    "                                Changelog",
-                    "-------------------------------------------------------------------------------"
-                }
-                .Concat(
-                    MainChangelog.ReadAllLines()[1..]
-                        .TakeUntil(line => line.StartsWith('['))
-                        .Select(line => line.TrimStart('#', ' '))
-                )
-                .Select(line => line.Replace("[", "").Replace("]", ""))
+            NexusModsOutputDirectory.CreateOrCleanDirectory();
+            ArchiveDirectory.CreateOrCleanDirectory();
+            
+            var currentVersion = AegirProject.GetProperty("version");
+            var changelog = MainChangelog.ReadAllLines()[1..];
+            
+            var changelogCurrent = changelog[3..]
+                .TakeUntil(line => line.StartsWith("## "))
+                .Select(line => line.TrimStart('#', ' '))
+                .Select(line => line.Replace("[", "").Replace("]", ""));
+            
+            var nexusChangelog = NexusModsPartChangelog.ReadAllLines()
+                .Concat(changelog
+                    .Select(line => line.TrimStart('#', ' '))
+                    .Select(line => line.Replace("[", "").Replace("]", "")))
                 .SkipLast(2);
 
             NexusModsChangelog
                 .TouchFile()
-                .WriteAllLines(changelog, Utf8NoBom);
+                .WriteAllLines(nexusChangelog, Utf8NoBom);
+            
+            AbsolutePath.Create(NexusModsDistDirectory / $"CHANGELOG.{currentVersion}.txt")
+                .TouchFile()
+                .WriteAllLines(changelogCurrent, Utf8NoBom);
 
-            ArchiveDirectory.CreateOrCleanDirectory();
-
+            var packedFile = AbsolutePath.Create(NexusModsOutputDirectory / PackedFileName);
+            
             CompiledFilePath.CopyToDirectory(ArchiveDirectory);
-            ArchiveDirectory.ZipTo(NexusModsOutputDirectory / PackedFileName);
+            
+            ArchiveDirectory.ZipTo(packedFile);
             NexusModsDistDirectory
                 .GetFiles()
+                .WhereNot(file => file.Name.Equals("CHANGELOG.part.txt"))
                 .ForEach(file => file.CopyToDirectory(NexusModsOutputDirectory));
-
+            
             NexusModsChangelog.DeleteFile();
             ArchiveDirectory.DeleteDirectory();
 
@@ -158,15 +175,35 @@ class Build : NukeBuild
                 .TouchFile()
                 .WriteAllLines(changelog, Utf8NoBom);
 
-            ArchiveDirectory.CreateOrCleanDirectory();
+            var currentVersion = AegirProject.GetProperty("version");
+            
+            {
+                using var input = File.OpenRead(ThunderStorePartConfigFile);
+                var table = TomlSerializer.Deserialize<TomlTable>(input)!;
+                var package = (TomlTable)table["package"]!;
+                var build = (TomlTableArray)((TomlTable)table["build"]!)["copy"]!;
 
-            CompiledFilePath.CopyToDirectory(ArchiveDirectory);
-            ThunderStoreDistDirectory.GetFiles().ForEach(file => file.CopyToDirectory(ArchiveDirectory));
-            ArchiveDirectory.ZipTo(ThunderStoreOutputDirectory / PackedFileName);
+                package.Add("namespace", AegirProject.GetProperty("authors"));
+                package.Add("name", AegirProject.GetProperty("product"));
+                package.Add("version", currentVersion);
+                package.Add("description", AegirProject.GetProperty("description"));
 
-            ThunderStoreChangelog.DeleteFile();
-            ArchiveDirectory.DeleteDirectory();
+                build.Add(new TomlTable
+                {
+                    ["source"] = Path.Combine("../..",
+                        Path.GetRelativePath(RootDirectory.ToString(), CompiledFilePath.ToString())),
+                    ["target"] = "./Aegir.dll"
+                });
 
+                if (File.Exists(ThunderStoreConfigFile))
+                    File.Delete(ThunderStoreConfigFile);
+
+                using var config = File.Create(ThunderStoreConfigFile);
+                TomlSerializer.Serialize(config, table);
+            }
+
+            DotNet($"tcli build --config-path {ThunderStoreConfigFile} --package-version {currentVersion}");
+            
             Log.Information("Packed files to {Target}", ThunderStoreOutputDirectory);
         });
 
