@@ -32,7 +32,11 @@ jobs:
       version: ${{ steps.check.outputs.version }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
 
       - name: Checking tag
         id: check
@@ -79,23 +83,23 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Download project artefact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: plugin-${{ github.sha }}
 
       - name: Parse changelog
         id: changelog_reader
-        uses: mindsers/changelog-reader-action@v2
+        uses: mindsers/changelog-reader-action@v2.4
         with:
           validation_level: warn
           version: ${{ needs.check-tag.outputs.version }}
           path: ${{ github.workspace }}/CHANGELOG.md
 
       - name: GitHub release
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@v1.21
         with:
           tag: ${{ needs.check-tag.outputs.tag }}
           body: ${{ steps.changelog_reader.outputs.changes }}
