@@ -116,14 +116,14 @@ jobs:
 
       - name: Parse changelog
         id: changelog_reader
-        uses: mindsers/changelog-reader-action@v2.4
+        uses: mindsers/changelog-reader-action@v2.4.0
         with:
           validation_level: warn
           version: ${{ needs.meta.outputs.version }}
           path: ${{ github.workspace }}/CHANGELOG.md
 
       - name: GitHub release
-        uses: ncipollo/release-action@v1.21
+        uses: ncipollo/release-action@v1.21.0
         with:
           tag: ${{ needs.meta.outputs.tag }}
           body: ${{ steps.changelog_reader.outputs.changes }}
