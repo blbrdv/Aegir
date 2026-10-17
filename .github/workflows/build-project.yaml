@@ -46,7 +46,7 @@ jobs:
           
           mapfile -t info < <(dotnet msbuild ${{ github.workspace }}/src \
             -getProperty:TargetFramework,Product,GameTitle,GameId \
-            | jq .Properties[])
+            | jq -r .Properties[])
           
           echo "tfm=${info[0]}" >> "$GITHUB_OUTPUT"
           echo "name=${info[1]}" >> "$GITHUB_OUTPUT"
