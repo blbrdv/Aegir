@@ -14,6 +14,17 @@ on:
         required: false
         type: boolean
         default: false
+    outputs:
+      tfm:
+        value: ${{ jobs.build-project.outputs.tfm }}
+      name:
+        value: ${{ jobs.build-project.outputs.name }}
+      author:
+        value: ${{ jobs.build-project.outputs.author }}
+      description:
+        value: ${{ jobs.build-project.outputs.description }}
+      version:
+        value: ${{ jobs.build-project.outputs.version }}
 
 env:
   GAME_ID: 896660
@@ -23,6 +34,13 @@ env:
 jobs:
   build-project:
     runs-on: ubuntu-latest
+    
+    outputs:
+      tfm: ${{ steps.meta.outputs.tfm }}
+      name: ${{ steps.meta.outputs.name }}
+      author: ${{ steps.meta.outputs.author }}
+      description: ${{ steps.meta.outputs.description }}
+      version: ${{ steps.meta.outputs.version }}
     
     steps:
       - uses: actions/checkout@v7
@@ -83,12 +101,19 @@ jobs:
       - name: Restore project
         run: ./run.sh restore
       
-      - name: Get TFM
-        id: tfm
+      - name: Get project meta info
+        id: meta
         run: |
-          value=$(dotnet msbuild "${{ github.workspace }}/src/Aegir.csproj" -getProperty:TargetFramework)
-          echo "Project Target Framework Moniker: $value"
-          echo "value=$value" >> "$GITHUB_OUTPUT"
+          mapfile -t values < <(dotnet msbuild "${{ github.workspace }}/src/Aegir.csproj" \
+            -getProperty:TargetFramework,Product,Authors,Description,Version \
+            | jq .Properties[])
+          
+          echo "Values: ${values[@]}"
+          echo "tfm=${values[0]}" >> "$GITHUB_OUTPUT"
+          echo "name=${values[1]}" >> "$GITHUB_OUTPUT"
+          echo "author=${values[2]}" >> "$GITHUB_OUTPUT"
+          echo "description=${values[3]}" >> "$GITHUB_OUTPUT"
+          echo "version=${values[4]}" >> "$GITHUB_OUTPUT"
   
       - name: Build project
         run: ./run.sh compile --build-config ${{ inputs.build-conf }} --game-path "${{ steps.game-path.outputs.value }}"
@@ -98,7 +123,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: plugin-${{ github.sha }}
-          path: ${{ github.workspace }}/src/bin/${{ inputs.build-conf }}/${{ steps.tfm.outputs.value }}/Aegir.dll
+          path: ${{ github.workspace }}/src/bin/${{ inputs.build-conf }}/${{ steps.meta.outputs.tfm }}/Aegir.dll
           compression-level: 0
           retention-days: 1
           if-no-files-found: error
