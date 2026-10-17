@@ -58,13 +58,13 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           
-          $tags=$(gh api \
+          mapfile -t tags < <(gh api \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             /repos/blbrdv/${{ env.Name }}/tags \
             | jq .[].name)
           
-          for name in $tags
+          for name in "${tags[@]}"
           do
             if [[ "$name" == "$tag" ]]; then
               echo "Tag '$tag' already exists. Update project version."
