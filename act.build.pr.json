@@ -1,0 +1,11 @@
+{
+  "pull_request": {
+    "head": {
+      "ref": "refs/heads/act-test"
+    },
+    "base": {
+      "ref": "refs/heads/main"
+    }
+  },
+  "act": true
+}
