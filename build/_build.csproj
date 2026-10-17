@@ -6,17 +6,25 @@
     <LangVersion>12</LangVersion>
     <!--suppress CheckTagEmptyBody -->
     <RootNamespace></RootNamespace>
-    <NoWarn>CS0649;CS0169</NoWarn>
-    <NukeRootDirectory>..</NukeRootDirectory>
-    <NukeScriptDirectory>..</NukeScriptDirectory>
-    <NukeTelemetryVersion>1</NukeTelemetryVersion>
+    <NoWarn>CS0649;CS0169;CA1050;CA1822;CA2211;IDE1006</NoWarn>
+    <FalloutRootDirectory>..</FalloutRootDirectory>
+    <FalloutScriptDirectory>..</FalloutScriptDirectory>
+    <IsPackable>false</IsPackable>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <UseArtifactsOutput>false</UseArtifactsOutput>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nuke.Common" Version="10.1.0" />
-    <!-- Fixing NU1903 (known vulnerabilities) -->
-    <PackageReference Include="NuGet.Packaging" Version="7.9.0" />
-    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.12" />
+    <PackageReference Include="Fallout.Common" Version="10.4.0" />
+    <PackageReference Include="Tomlyn" Version="2.10.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="boot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="..\build_old\**" />
   </ItemGroup>
 
 </Project>

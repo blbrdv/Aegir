@@ -1,0 +1,26 @@
+[package]
+websiteUrl = "https://github.com/blbrdv/Aegir"
+containsNsfwContent = false
+
+[package.dependencies]
+denikson-BepInExPack_Valheim = "5.4.2350"
+
+[build]
+icon = "./icon.png"
+readme = "./README.md"
+outdir = "../../output/ThunderStore"
+
+[[build.copy]]
+source = "./FAQ.md"
+target = "./FAQ.md"
+
+[[build.copy]]
+source = "./CHANGELOG.md"
+target = "./CHANGELOG.md"
+
+[publish]
+repository = "https://thunderstore.io"
+communities = [ "valheim" ]
+
+[publish.categories]
+hades-ii = [ "mods", "misc", "client-side" ]

@@ -58,7 +58,7 @@ nunit-*.xml
 
 # build
 .fake
-.nuke/temp
+.fallout/temp
 
 # zip release directory
 output
