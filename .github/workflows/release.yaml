@@ -48,7 +48,6 @@ jobs:
 
       - name: Checking tag
         id: check
-        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
