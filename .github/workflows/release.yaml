@@ -2,6 +2,19 @@ name: Release
 
 on:
   workflow_dispatch:
+    inputs: 
+      github:
+        type: boolean
+        default: false
+        description: Release project to GitHub Releases
+      thunderstore:
+        type: boolean
+        default: false
+        description: Release project to ThunderStore
+      nexusmods:
+        type: boolean
+        default: false
+        description: Release project to NexusMods
   push:
     branches:
       - 'main'
@@ -25,7 +38,7 @@ jobs:
     outputs:
       tag: ${{ steps.check.outputs.tag }}
       version: ${{ steps.check.outputs.version }}
-
+    
     steps:
       - uses: actions/checkout@v7
 
@@ -61,21 +74,24 @@ jobs:
           done
 
   build:
+    name: 'Build'
+    
     needs: check-tag
-
-    name: Build project
 
     uses: ./.github/workflows/build-project.yaml
     with:
       target-ref: 'main'
       build-conf: 'Release'
+      upload: true
 
   github-release:
-    needs: [ build, check-tag ]
+    if: ${{ inputs.github && !github.event.act }}
 
-    name: Github release
+    name: 'Github release'
 
     runs-on: ubuntu-latest
+
+    needs: [ build, check-tag ]
 
     permissions:
       contents: write
@@ -104,3 +120,55 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: false
           artifacts: ${{ github.workspace }}/${{ env.Name }}.dll
+  
+  thunderstore-release:
+    if: ${{ inputs.thunderstore && !github.event.act }}
+
+    name: 'Thunderstore release'
+
+    runs-on: ubuntu-latest
+
+    needs: [ build, check-tag ]
+    
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download project artefact
+        uses: actions/download-artifact@v8
+        with:
+          name: plugin-${{ github.sha }}
+
+      - name: Publish to Thunderstore
+        uses: MaxtorCoder/thunderstore-publish@v1.0.2
+        with:
+          token: ${{ secrets.TS_TOKEN }}
+          file: ${{ github.workspace }}/output/ThunderStore/blbrdv-${{ env.Name }}-${{ needs.check-tag.outputs.version }}.zip
+  
+  nexusmods-release:
+    if: ${{ inputs.nexusmods && !github.event.act }}
+
+    name: 'NexusMods release'
+
+    runs-on: ubuntu-latest
+
+    needs: [ build, check-tag ]
+    
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download project artefact
+        uses: actions/download-artifact@v8
+        with:
+          name: plugin-${{ github.sha }}
+
+      - name: Publish to NexusMods
+        uses: Nexus-Mods/upload-action@v1.0.0-beta.11
+        with:
+          api_key: ${{ secrets.NEXUS_API_KEY }}
+          file_id: ${{ vars.NEXUS_FILE_ID }}
+          mod_id: ${{ vars.NEXUS_MOD_ID }}
+          filename: ${{ github.workspace }}/output/NexusMods/${{ env.Name }}-${{ needs.check-tag.outputs.version }}.zip
+          name: ${{ env.Name }}
+          primary_mod_manager_download: true
+          show_requirements_pop_up: true
+    

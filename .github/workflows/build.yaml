@@ -27,9 +27,9 @@ env:
 
 jobs:
   target:
-    runs-on: ubuntu-latest
+    name: 'Set target ref'
 
-    name: Set target ref
+    runs-on: ubuntu-latest
 
     outputs:
       target-ref: ${{ steps.ref.outputs.target-ref }}
@@ -48,6 +48,8 @@ jobs:
 
   build:
     needs: target
+
+    name: 'Build'
 
     uses: ./.github/workflows/build-project.yaml
     with:
