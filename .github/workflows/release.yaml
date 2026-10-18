@@ -29,7 +29,7 @@ env:
 
 jobs:
   meta:
-    name: 'Get project info and check version'
+    name: 'Get project info'
     
     runs-on: ubuntu-latest
     
