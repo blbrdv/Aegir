@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.0] - 2026-10-18
+
+### Changed
+
+- Bumped to game version 1.0.20
+
 ## [1.5.0] - 2026-09-12
 
 ### Changed
