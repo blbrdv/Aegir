@@ -36,9 +36,7 @@ jobs:
     outputs:
       name: ${{ steps.props.outputs.name }}
       author: ${{ steps.props.outputs.author }}
-      description: ${{ steps.props.outputs.description }}
       version: ${{ steps.props.outputs.version }}
-      game-name: ${{ steps.props.outputs.game-name }}
       tag: ${{ steps.check.outputs.tag }}
     
     steps:
@@ -54,38 +52,12 @@ jobs:
           set -x
           
           mapfile -t info < <(dotnet msbuild ${{ github.workspace }}/src \
-            -getProperty:Product,Authors,Description,Version,GameTitle \
+            -getProperty:Product,Authors,Version \
             | jq -r .Properties[])
           
           echo "name=${info[0]}" >> "$GITHUB_OUTPUT"
           echo "author=${info[1]}" >> "$GITHUB_OUTPUT"
-          echo "description=${info[2]}" >> "$GITHUB_OUTPUT"
-          echo "version=${info[3]}" >> "$GITHUB_OUTPUT"
-          echo "${info[4]}" | awk '{printf "%s=%s\n", "game-name", tolower($0)}' >> "$GITHUB_OUTPUT"
-
-      - name: Checking tag
-        id: check
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -x
-          
-          tag="v${{ steps.props.outputs.version }}"
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          
-          mapfile -t tags < <(gh api \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${{ steps.props.outputs.author }}/${{ steps.props.outputs.name }}/tags \
-            | jq -r .[].name)
-          
-          for name in "${tags[@]}"
-          do
-            if [[ "$name" == "$tag" ]]; then
-              echo "Tag '$tag' already exists. Update project version."
-              exit 1
-            fi
-          done
+          echo "version=${info[2]}" >> "$GITHUB_OUTPUT"
 
   build:
     name: 'Build'
@@ -112,6 +84,30 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+
+      - name: Checking tag
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -x
+
+          tag="v${{ needs.meta.outputs.version }}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+          mapfile -t tags < <(gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/${{ needs.meta.outputs.author }}/${{ needs.meta.outputs.name }}/tags \
+            | jq -r .[].name)
+
+          for name in "${tags[@]}"
+          do
+            if [[ "$name" == "$tag" ]]; then
+              echo "Tag '$tag' already exists. Update project version."
+              exit 1
+            fi
+          done
 
       - name: Download project artefact
         uses: actions/download-artifact@v8
@@ -152,16 +148,16 @@ jobs:
         with:
           name: plugin-${{ github.sha }}
 
+      - name: Dotnet restore
+        uses: ./.github/actions/restore
+      
+      - name: Pack for Thunderstore
+        run: ./run.sh PackForThunderstore
+          
       - name: Publish to Thunderstore
-        uses: MaxtorCoder/thunderstore-publish@v1.0.2
-        with:
-          token: ${{ secrets.TS_TOKEN }}
-          communities: ${{ needs.meta.outputs.game-name }}
-          namespace: ${{ needs.meta.outputs.author }}
-          name: ${{ needs.meta.outputs.name }}
-          description: ${{ needs.meta.outputs.description }}
-          version: ${{ needs.meta.outputs.version }}
-          file: ${{ github.workspace }}/output/ThunderStore/${{ needs.meta.outputs.author }}-${{ needs.meta.outputs.name }}-${{ needs.meta.outputs.version }}.zip
+        run: |
+          set -ex
+          dotnet tcli publish --config-path ${{ github.workspace }}/dist/ThunderStore/thunderstore.toml
   
   nexusmods-release:
     if: ${{ inputs.nexusmods && !github.event.act }}
@@ -179,12 +175,17 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: plugin-${{ github.sha }}
+
+      - name: Dotnet restore
+        uses: ./.github/actions/restore
+
+      - name: Pack for NexusMods
+        run: ./run.sh PackForNexusMods
       
       - name: Get changelog for current version
         id: current-changelog
         run: |
-          set -x
-          
+          set -ex
           echo "value=$(cat ${{ github.workspace }}/dist/NexusMods/CHANGELOG.${{ needs.meta.outputs.version }}.txt)" >> "$GITHUB_OUTPUT"
 
       - name: Publish to NexusMods
@@ -195,7 +196,7 @@ jobs:
           mod_id: ${{ secrets.NEXUS_MOD_ID }}
           filename: ${{ github.workspace }}/output/NexusMods/${{ needs.meta.outputs.name }}-${{ needs.meta.outputs.version }}.zip
           display_name: ${{ needs.meta.outputs.name }}
+          version: ${{ needs.meta.outputs.version }}
           primary_mod_manager_download: true
           show_requirements_pop_up: true
           changelog: ${{ steps.current-changelog.outputs.value }}
-    

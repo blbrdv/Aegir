@@ -36,9 +36,6 @@ jobs:
         id: steamcmd
         uses: CyberAndrii/setup-steamcmd@v1.3.0
 
-      - name: Restore project
-        run: ./run.sh restore
-
       - name: Get project properties
         id: props
         run: |
