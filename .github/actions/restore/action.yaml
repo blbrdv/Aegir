@@ -39,7 +39,7 @@ runs:
         path: |
           ${{ steps.nuget.outputs.paths }}
           ${{ github.workspace }}/build/obj
-        key: build-${{ hashFiles(steps.nuget.outputs.list, 'global.json', './.fallout/**', './build/**', '!./build/obj/**') }}
+        key: build-${{ hashFiles(steps.nuget.outputs.list, 'global.json', 'dotnet-tools.json', './.fallout/**', './build/**', '!./build/obj/**') }}
         restore-keys: build-
         enableCrossOsArchive: true
 
@@ -47,10 +47,8 @@ runs:
       with:
         global-json-file: global.json
 
-    - name: Restore build
-      shell: bash
-      run: dotnet restore "build/_build.csproj"
-
     - name: Restore project
       shell: bash
-      run: ./run.sh restore
+      run: |
+        dotnet restore
+        dotnet tool restore
