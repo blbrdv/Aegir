@@ -71,7 +71,7 @@ jobs:
       upload: true
 
   github-release:
-    if: ${{ inputs.github && !github.event.act }}
+    if: ${{ case( github.event_name == "workflow_dispatch", inputs.github && !github.event.act, true ) }}
 
     name: 'Github release'
 
@@ -131,7 +131,7 @@ jobs:
           artifacts: ${{ github.workspace }}/${{ needs.meta.outputs.name }}.dll
   
   thunderstore-release:
-    if: ${{ inputs.thunderstore && !github.event.act }}
+    if: ${{ case( github.event_name == "workflow_dispatch", inputs.thunderstore && !github.event.act, true ) }}
 
     name: 'Thunderstore release'
 
@@ -159,7 +159,7 @@ jobs:
           dotnet tcli publish --config-path ${{ github.workspace }}/dist/ThunderStore/thunderstore.toml
   
   nexusmods-release:
-    if: ${{ inputs.nexusmods && !github.event.act }}
+    if: ${{ case( github.event_name == "workflow_dispatch", inputs.nexusmods && !github.event.act, true ) }}
 
     name: 'NexusMods release'
 
