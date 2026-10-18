@@ -52,5 +52,5 @@ runs:
       run: dotnet restore "build/_build.csproj"
 
     - name: Restore project
-    - shell: bash
+      shell: bash
       run: ./run.sh restore
