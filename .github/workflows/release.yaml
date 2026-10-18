@@ -93,7 +93,6 @@ jobs:
           set -x
 
           tag="v${{ needs.meta.outputs.version }}"
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
           mapfile -t tags < <(gh api \
             -H "Accept: application/vnd.github+json" \
@@ -125,7 +124,7 @@ jobs:
       - name: GitHub release
         uses: ncipollo/release-action@v1.21.0
         with:
-          tag: ${{ needs.meta.outputs.tag }}
+          tag: ${{ steps.check.outputs.tag }}
           body: ${{ steps.changelog_reader.outputs.changes }}
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: false
