@@ -27,8 +27,8 @@ runs:
           deps=$(cat <<EOF
           ${{ github.workspace }}/build/packages.lock.json
           ${{ github.workspace }}/src/packages.lock.json
-          EOF
-          )
+        EOF
+        )
           
           restore_cmd="dotnet restore"
         fi
