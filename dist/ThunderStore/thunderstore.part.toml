@@ -6,16 +6,16 @@ containsNsfwContent = false
 denikson-BepInExPack_Valheim = "5.4.2350"
 
 [build]
-icon = "./icon.png"
-readme = "./README.md"
-outdir = "../../output/ThunderStore"
+icon = "./dist/ThunderStore/icon.png"
+readme = "./dist/ThunderStore/README.md"
+outdir = "./output/ThunderStore"
 
 [[build.copy]]
-source = "./FAQ.md"
+source = "./dist/ThunderStore/FAQ.md"
 target = "./FAQ.md"
 
 [[build.copy]]
-source = "./CHANGELOG.md"
+source = "./dist/ThunderStore/CHANGELOG.md"
 target = "./CHANGELOG.md"
 
 [publish]

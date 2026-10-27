@@ -33,51 +33,62 @@ jobs:
     
     runs-on: ubuntu-latest
     
-    outputs:
-      name: ${{ steps.props.outputs.name }}
-      author: ${{ steps.props.outputs.author }}
-      version: ${{ steps.props.outputs.version }}
-      tag: ${{ steps.check.outputs.tag }}
-    
     steps:
       - uses: actions/checkout@v7
 
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
-      
+
+  build:
+    needs: meta
+    
+    runs-on: ubuntu-latest
+    
+    outputs:
+      name: ${{ steps.props.outputs.name }}
+      author: ${{ steps.props.outputs.author }}
+      version: ${{ steps.props.outputs.version }}
+      tfm: ${{ steps.props.outputs.tfm }}
+      tag: ${{ steps.check.outputs.tag }}
+
+    steps:
+      - 
+      - uses: actions/checkout@v7
+
+      - name: Dotnet restore
+        uses: ./.github/actions/restore
+        with:
+          only-restore: false
+          no-mod-cache: false
+
       - name: Get project properties
         id: props
         run: |
           set -x
-          
+    
           mapfile -t info < <(dotnet msbuild ${{ github.workspace }}/src \
-            -getProperty:Product,Authors,Version \
+            -getProperty:Product,Authors,Version,TargetFramework \
             | jq -r .Properties[])
-          
+      
           echo "name=${info[0]}" >> "$GITHUB_OUTPUT"
           echo "author=${info[1]}" >> "$GITHUB_OUTPUT"
           echo "version=${info[2]}" >> "$GITHUB_OUTPUT"
+          echo "tfm=${info[3]}" >> "$GITHUB_OUTPUT"
 
-  build:
-    name: 'Build'
-    
-    needs: meta
-
-    uses: ./.github/workflows/build-project.yaml
-    with:
-      target-ref: 'main'
-      build-conf: 'Release'
-      upload: true
+      - name: Build
+        uses: ./.github/actions/build
+        with:
+          build-conf: 'Release'
 
   github-release:
-    if: ${{ case( github.event_name == 'workflow_dispatch', inputs.github && !github.event.act, true ) }}
+    if: ${{ case( github.event_name == 'workflow_dispatch', inputs.github, true ) }}
 
     name: 'Github release'
 
     runs-on: ubuntu-latest
 
-    needs: [ build, meta ]
+    needs: build
 
     permissions:
       contents: write
@@ -92,12 +103,12 @@ jobs:
         run: |
           set -x
 
-          tag="v${{ needs.meta.outputs.version }}"
+          tag="v${{ needs.build.outputs.version }}"
 
           mapfile -t tags < <(gh api \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${{ needs.meta.outputs.author }}/${{ needs.meta.outputs.name }}/tags \
+            /repos/${{ needs.build.outputs.author }}/${{ needs.build.outputs.name }}/tags \
             | jq -r .[].name)
 
           for name in "${tags[@]}"
@@ -118,84 +129,85 @@ jobs:
         uses: mindsers/changelog-reader-action@v2.4.0
         with:
           validation_level: warn
-          version: ${{ needs.meta.outputs.version }}
+          version: ${{ needs.build.outputs.version }}
           path: ${{ github.workspace }}/CHANGELOG.md
 
       - name: GitHub release
+        if: ${{ !github.event.act }}
         uses: ncipollo/release-action@v1.21.0
         with:
           tag: ${{ steps.check.outputs.tag }}
           body: ${{ steps.changelog_reader.outputs.changes }}
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: false
-          artifacts: ${{ github.workspace }}/${{ needs.meta.outputs.name }}.dll
+          artifacts: ${{ github.workspace }}/${{ needs.build.outputs.name }}.dll
   
   thunderstore-release:
-    if: ${{ case( github.event_name == 'workflow_dispatch', inputs.thunderstore && !github.event.act, true ) }}
+    if: ${{ case( github.event_name == 'workflow_dispatch', inputs.thunderstore, true ) }}
 
     name: 'Thunderstore release'
 
     runs-on: ubuntu-latest
 
-    needs: [ build, meta ]
-    
+    needs: build
+
     steps:
       - uses: actions/checkout@v7
+
+      - name: Dotnet restore
+        uses: ./.github/actions/restore
 
       - name: Download project artefact
         uses: actions/download-artifact@v8
         with:
           name: plugin-${{ github.sha }}
 
-      - name: Dotnet restore
-        uses: ./.github/actions/restore
-      
-      - name: Pack for Thunderstore
-        run: ./run.sh PackForThunderstore
-          
-      - name: Publish to Thunderstore
-        run: |
-          set -ex
-          dotnet tcli publish --config-path ${{ github.workspace }}/dist/ThunderStore/thunderstore.toml
+      - name: Pack
+        run: ./run.sh PackForThunderstore --build-config Release
+
+      - name: Publish
+        if: ${{ !github.event.act }}
+        run: dotnet tcli publish
   
   nexusmods-release:
-    if: ${{ case( github.event_name == 'workflow_dispatch', inputs.nexusmods && !github.event.act, true ) }}
-
+    if: ${{ case( github.event_name == 'workflow_dispatch', inputs.nexusmods, true ) }}
+    
     name: 'NexusMods release'
 
     runs-on: ubuntu-latest
 
-    needs: [ build, meta ]
-    
+    needs: build
+
     steps:
       - uses: actions/checkout@v7
+
+      - name: Dotnet restore
+        uses: ./.github/actions/restore
 
       - name: Download project artefact
         uses: actions/download-artifact@v8
         with:
           name: plugin-${{ github.sha }}
+        
+      - name: Pack
+        run: ./run.sh PackForNexusMods --build-config Release
 
-      - name: Dotnet restore
-        uses: ./.github/actions/restore
-
-      - name: Pack for NexusMods
-        run: ./run.sh PackForNexusMods
-      
       - name: Get changelog for current version
         id: current-changelog
         run: |
           set -ex
-          echo "value=$(cat ${{ github.workspace }}/dist/NexusMods/CHANGELOG.${{ needs.meta.outputs.version }}.txt)" >> "$GITHUB_OUTPUT"
+          echo "value=$(cat ${{ github.workspace }}/dist/NexusMods/CHANGELOG.${{ needs.build.outputs.version }}.txt)" >> "$GITHUB_OUTPUT"
 
-      - name: Publish to NexusMods
+      - name: Publish
+        if: ${{ !github.event.act }}
         uses: Nexus-Mods/upload-action@v1.0.0-beta.11
         with:
           api_key: ${{ secrets.NEXUS_API_KEY }}
           file_id: ${{ secrets.NEXUS_FILE_ID }}
           mod_id: ${{ secrets.NEXUS_MOD_ID }}
-          filename: ${{ github.workspace }}/output/NexusMods/${{ needs.meta.outputs.name }}-${{ needs.meta.outputs.version }}.zip
-          display_name: ${{ needs.meta.outputs.name }}
-          version: ${{ needs.meta.outputs.version }}
+          filename: ${{ github.workspace }}/output/NexusMods/${{ needs.build.outputs.name }}-${{ needs.build.outputs.version }}.zip
+          display_name: ${{ needs.build.outputs.name }}
+          version: ${{ needs.build.outputs.version }}
           primary_mod_manager_download: true
           show_requirements_pop_up: true
           changelog: ${{ steps.current-changelog.outputs.value }}

@@ -1,54 +1,91 @@
 name: 'Restore build'
 
+inputs:
+  only-restore:
+    type: boolean
+    required: false
+    default: true
+  no-mod-cache:
+    type: boolean
+    required: false
+    default: true
+
 runs:
   using: 'composite'
 
   steps:
-    - name: Set nuget packages list
-      id: nuget
+    - id: params
       shell: bash
       run: |
         set -x
         
-        nl=$'\n'
-        output="$(dotnet nuget locals all --list --force-english-output)"
-        r="[^ $nl]+ ([^$nl]+)"
-        paths=""
-        list=""
+        if [[ "true" == "${{ inputs.only-restore }}" ]]
+        then
+          action_name="actions/cache/restore"
+        else
+          action_name="actions/cache"
+        fi
         
-        while [[ "$output" =~ $r ]]; do
-          value="${x:+x }${BASH_REMATCH[1]}"
-          output=${output#*"${BASH_REMATCH[0]}"}
-          esc=$(echo "$value/**" | sed 's/\//\\\//g')
-          if [[ "$paths" == "" ]]; then
-            paths="$value"
-            list="'$esc'"
-          else
-            paths="$paths$nl$value"
-            list="$list, '$esc'"
-          fi
-        done
+        if [[ "true" == "${{ inputs.no-mod-cache }}" ]]
+        then
+          run_mod_cache="false"
+          deps="${{ github.workspace }}/build/packages.lock.json"
+          restore_cmd="dotnet restore ${{ github.workspace }}/build/_build.csproj"
+        else
+          run_mod_cache="true"
+          deps="${{ github.workspace }}/build/packages.lock.json\n${{ github.workspace }}/src/packages.lock.json"
+          restore_cmd="dotnet restore"
+        fi
         
-        echo "paths<<EOF" >> "$GITHUB_OUTPUT"
-        echo "$paths" >> "$GITHUB_OUTPUT"
-        echo "EOF" >> "$GITHUB_OUTPUT"
-        echo "list=$list" >> "$GITHUB_OUTPUT"
-
-    - uses: actions/cache@v6.1.0
+        echo "action-name=$action_name" >> "$GITHUB_OUTPUT"
+        echo "run-mod-cache=$run_mod_cache" >> "$GITHUB_OUTPUT"
+        echo "deps=$deps" >> "$GITHUB_OUTPUT"
+        echo "restore-cmd=$restore_cmd" >> "$GITHUB_OUTPUT"
+  
+    - uses: ${{ steps.params.outputs.action-name }}@v6.1.0
+      name: Cache build
       with:
         path: |
-          ${{ steps.nuget.outputs.paths }}
-          ${{ github.workspace }}/build/obj
-        key: build-${{ hashFiles(steps.nuget.outputs.list, 'global.json', 'dotnet-tools.json', './.fallout/**', './build/**', '!./build/obj/**') }}
+          ${{ github.workspace }}/build/bin/**
+          ${{ github.workspace }}/build/obj/**
+        key: >
+          build-${{
+            hashFiles(
+              './.fallout/**',
+              './build/**',
+              '!./build/bin/**',
+              '!./build/obj/**'
+            )
+          }}
         restore-keys: build-
+        enableCrossOsArchive: true
+
+    - uses: ${{ steps.params.outputs.action-name }}@v6.1.0
+      name: Cache project
+      if: ${{ steps.params.outputs.run-mod-cache }}
+      with:
+        path: |
+          ${{ github.workspace }}/src/bin/**
+          ${{ github.workspace }}/src/obj/**
+        key: >
+          src-${{
+            hashFiles(
+              './src/**',
+              '!./src/bin/**',
+              '!./src/obj/**'
+            )
+          }}
+        restore-keys: src-
         enableCrossOsArchive: true
 
     - uses: actions/setup-dotnet@v6
       with:
         global-json-file: global.json
+        cache: true
+        cache-dependency-path: ${{ steps.params.outputs.deps }}
 
-    - name: Restore project
+    - name: Restore project(s)
       shell: bash
       run: |
-        dotnet restore
+        ${{ steps.params.outputs.restore-cmd }}
         dotnet tool restore

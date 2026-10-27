@@ -12,8 +12,7 @@ on:
       - 'main'
     paths:
       - '.github/workflows/build.yaml'
-      - '.github/workflows/build-project.yaml'
-      - '.github/actions/restore/action.yaml'
+      - '.github/actions/**'
       - '.fallout/**'
       - 'build/**'
       - 'dist/**'
@@ -26,13 +25,8 @@ env:
   ContinuousIntegrationBuild: true
 
 jobs:
-  target:
-    name: 'Set target ref'
-
+  build:
     runs-on: ubuntu-latest
-
-    outputs:
-      target-ref: ${{ steps.ref.outputs.target-ref }}
 
     steps:
       - name: Set target ref
@@ -40,7 +34,8 @@ jobs:
         run: |
           set -x
           
-          if [[ "true" == "${{ inputs.target-ref == '' }}" ]]; then
+          if [[ "true" == "${{ inputs.target-ref == '' }}" ]]
+          then
             ref="${{ github.ref }}"
           else
             ref="${{ inputs.target-ref }}"
@@ -48,11 +43,19 @@ jobs:
           
           echo "target-ref=$ref" >> "$GITHUB_OUTPUT"
 
-  build:
-    needs: target
+      - uses: actions/checkout@v7
+        with:
+          repository: 'blbrdv/Aegir'
+          ref: ${{ steps.ref.outputs.target-ref }}
+          fetch-depth: 0
 
-    name: 'Build'
-
-    uses: ./.github/workflows/build-project.yaml
-    with:
-      target-ref: ${{ needs.target.outputs.target-ref }}
+      - name: Dotnet restore
+        uses: ./.github/actions/restore
+        with:
+          only-restore: false
+          no-mod-cache: false
+          
+      - name: Build
+        uses: ./.github/actions/build
+        with:
+          upload: true
