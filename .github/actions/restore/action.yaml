@@ -24,11 +24,18 @@ runs:
           deps="${{ github.workspace }}/build/packages.lock.json"
           restore_cmd="dotnet restore ${{ github.workspace }}/build/_build.csproj"
         else
-          deps="${{ github.workspace }}/build/packages.lock.json\n${{ github.workspace }}/src/packages.lock.json"
+          deps=$(cat << 'EOF'
+          ${{ github.workspace }}/build/packages.lock.json
+          ${{ github.workspace }}/src/packages.lock.json
+          EOF
+          )
           restore_cmd="dotnet restore"
         fi
+          
+        echo "deps<<EOF" >> $GITHUB_OUTPUT
+        echo "$deps" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
         
-        echo "deps=$deps" >> "$GITHUB_OUTPUT"
         echo "restore-cmd=$restore_cmd" >> "$GITHUB_OUTPUT"
   
     - uses: actions/cache@v6.1.0
