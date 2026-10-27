@@ -1,4 +1,9 @@
-{
+{  
+  "inputs": {
+    "github": true,
+    "thunderstore": true,
+    "nexusmods": true
+  },
   "ref": "refs/heads/main",
   "act": true
 }

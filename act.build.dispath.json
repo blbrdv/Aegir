@@ -1,6 +1,3 @@
 {
-  "inputs": {
-    "target-ref": "refs/heads/act-test"
-  },
   "act": true
 }
