@@ -28,18 +28,6 @@ env:
   ContinuousIntegrationBuild: true
 
 jobs:
-  meta:
-    name: 'Get project info'
-    
-    runs-on: ubuntu-latest
-    
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: actions/setup-dotnet@v6
-        with:
-          global-json-file: global.json
-
   build:
     needs: meta
     
@@ -53,7 +41,6 @@ jobs:
       tag: ${{ steps.check.outputs.tag }}
 
     steps:
-      - 
       - uses: actions/checkout@v7
 
       - name: Dotnet restore
