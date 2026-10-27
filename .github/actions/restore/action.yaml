@@ -19,30 +19,20 @@ runs:
       run: |
         set -x
         
-        if [[ "true" == "${{ inputs.only-restore }}" ]]
-        then
-          action_name="actions/cache/restore"
-        else
-          action_name="actions/cache"
-        fi
-        
         if [[ "true" == "${{ inputs.no-mod-cache }}" ]]
         then
-          run_mod_cache="false"
           deps="${{ github.workspace }}/build/packages.lock.json"
           restore_cmd="dotnet restore ${{ github.workspace }}/build/_build.csproj"
         else
-          run_mod_cache="true"
           deps="${{ github.workspace }}/build/packages.lock.json\n${{ github.workspace }}/src/packages.lock.json"
           restore_cmd="dotnet restore"
         fi
         
-        echo "action-name=$action_name" >> "$GITHUB_OUTPUT"
-        echo "run-mod-cache=$run_mod_cache" >> "$GITHUB_OUTPUT"
         echo "deps=$deps" >> "$GITHUB_OUTPUT"
         echo "restore-cmd=$restore_cmd" >> "$GITHUB_OUTPUT"
   
-    - uses: ${{ steps.params.outputs.action-name }}@v6.1.0
+    - uses: actions/cache@v6.1.0
+      if: ${{ !inputs.only-restore }}
       name: Cache build
       with:
         path: |
@@ -60,9 +50,46 @@ runs:
         restore-keys: build-
         enableCrossOsArchive: true
 
-    - uses: ${{ steps.params.outputs.action-name }}@v6.1.0
+    - uses: actions/cache@v6.1.0
       name: Cache project
-      if: ${{ steps.params.outputs.run-mod-cache }}
+      if: ${{ !inputs.only-restore && !inputs.no-mod-cache }}
+      with:
+        path: |
+          ${{ github.workspace }}/src/bin/**
+          ${{ github.workspace }}/src/obj/**
+        key: >
+          src-${{
+            hashFiles(
+              './src/**',
+              '!./src/bin/**',
+              '!./src/obj/**'
+            )
+          }}
+        restore-keys: src-
+        enableCrossOsArchive: true
+
+    - uses: actions/cache/restore@v6.1.0
+      if: ${{ inputs.only-restore }}
+      name: Cache build
+      with:
+        path: |
+          ${{ github.workspace }}/build/bin/**
+          ${{ github.workspace }}/build/obj/**
+        key: >
+          build-${{
+            hashFiles(
+              './.fallout/**',
+              './build/**',
+              '!./build/bin/**',
+              '!./build/obj/**'
+            )
+          }}
+        restore-keys: build-
+        enableCrossOsArchive: true
+
+    - uses: actions/cache/restore@v6.1.0
+      name: Cache project
+      if: ${{ inputs.only-restore && !inputs.no-mod-cache }}
       with:
         path: |
           ${{ github.workspace }}/src/bin/**
@@ -89,3 +116,4 @@ runs:
       run: |
         ${{ steps.params.outputs.restore-cmd }}
         dotnet tool restore
+
