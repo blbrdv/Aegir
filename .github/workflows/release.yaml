@@ -29,7 +29,7 @@ env:
 
 jobs:
   build:
-    needs: meta
+    name: 'Build project'
     
     runs-on: ubuntu-latest
     
@@ -37,8 +37,6 @@ jobs:
       name: ${{ steps.props.outputs.name }}
       author: ${{ steps.props.outputs.author }}
       version: ${{ steps.props.outputs.version }}
-      tfm: ${{ steps.props.outputs.tfm }}
-      tag: ${{ steps.check.outputs.tag }}
 
     steps:
       - uses: actions/checkout@v7
@@ -61,7 +59,6 @@ jobs:
           echo "name=${info[0]}" >> "$GITHUB_OUTPUT"
           echo "author=${info[1]}" >> "$GITHUB_OUTPUT"
           echo "version=${info[2]}" >> "$GITHUB_OUTPUT"
-          echo "tfm=${info[3]}" >> "$GITHUB_OUTPUT"
 
       - name: Build
         uses: ./.github/actions/build
