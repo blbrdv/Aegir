@@ -20,6 +20,7 @@ runs:
 
     - name: Get project properties
       id: props
+      shell: bash
       run: |
         set -x
         
@@ -36,6 +37,7 @@ runs:
     
     # Little hack to let Steam think that we own this game
     - name: Create Steam manifest file
+      shell: bash
       run: |
         set -x
         
@@ -53,6 +55,7 @@ runs:
         echo "$manifest" > ${{ steps.steamcmd.outputs.directory }}/steamapps/appmanifest_${{ steps.props.outputs.game-id }}.acf
 
     - name: Download game
+      shell: bash
       id: download
       run: |
         set -x
@@ -78,6 +81,7 @@ runs:
         done
 
     - name: Build project
+      shell: bash
       run: ./run.sh compile --build-config ${{ inputs.build-conf }} --game-path "${{ steps.props.outputs.game-path }}"
 
     - name: Upload build
