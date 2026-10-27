@@ -66,8 +66,7 @@ _temp
 
 dist/**/CHANGELOG.*
 !dist/NexusMods/CHANGELOG.part.txt
-dist/Aegir.dll
-dist/ThunderStore/thunderstore.toml
+thunderstore.toml
 
 # Act config file
 .actrc

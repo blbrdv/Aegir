@@ -39,34 +39,17 @@ class Build : FalloutBuild
     readonly Encoding _utf8NoBom = new UTF8Encoding(false);
 
     Project AegirProject => Solution.GetProject("Aegir");
-    string ProjectTargetFramework => AegirProject.GetTargetFrameworks()!.First();
-    string CompiledFileName => AegirProject.Name + ".dll";
-    string PackedFileName => AegirProject.Name + "-" + AegirProject.GetProperty("version") + ".zip";
     
     static AbsolutePath MainChangelog => RootDirectory / "CHANGELOG.md";
     static AbsolutePath SourceDirectory => RootDirectory / "src";
     static AbsolutePath OutputDirectory => RootDirectory / "output";
-    static AbsolutePath NexusModsOutputDirectory => OutputDirectory / "NexusMods";
-    static AbsolutePath ThunderStoreOutputDirectory => OutputDirectory / "ThunderStore";
-    static AbsolutePath ArchiveDirectory => RootDirectory / "_tmp";
-    static AbsolutePath NexusModsDistDirectory => RootDirectory / "dist" / "NexusMods";
-    static AbsolutePath NexusModsChangelog => NexusModsDistDirectory / "CHANGELOG.txt";
-    static AbsolutePath NexusModsPartChangelog => NexusModsDistDirectory / "CHANGELOG.part.txt";
-    static AbsolutePath ThunderStoreDistDirectory => RootDirectory / "dist" / "ThunderStore";
-    static AbsolutePath ThunderStoreChangelog => ThunderStoreDistDirectory / "CHANGELOG.md";
-    static AbsolutePath ThunderStorePartConfigFile => ThunderStoreDistDirectory / "thunderstore.part.toml";
-    static AbsolutePath ThunderStoreConfigFile => ThunderStoreDistDirectory / "thunderstore.toml";
 
-    AbsolutePath PluginsDirectory =>
-        AbsolutePath.Create(Path.Combine(GamePath, BepinexPath));
-    
-    AbsolutePath BuildDirectory => SourceDirectory / "bin" / BuildConfig / ProjectTargetFramework;
-    AbsolutePath CompiledFilePath => BuildDirectory / CompiledFileName;
-    AbsolutePath CompiledPluginPath => PluginsDirectory / CompiledFileName;
+    static RelativePath RelativeRootDirectory(AbsolutePath path)
+        => (RelativePath)$"./{RootDirectory.GetRelativePathTo(path)}";
 
     Target Clean => _ => _
         .Description("Clean build and output directories")
-        .Before(Restore)
+        .Before(Compile)
         .Executes(() =>
         {
             var buildDirs = SourceDirectory.GlobDirectories("**/bin", "**/obj");
@@ -80,24 +63,12 @@ class Build : FalloutBuild
             OutputDirectory.CreateOrCleanDirectory();
         });
 
-    Target Restore => _ => _
-        .Description("Look for and download project dependencies")
-        .Requires(() => BuildConfig)
-        .Before(Compile)
-        .After(Clean)
-        .Executes(() =>
-        {
-            DotNetRestore(s => s
-                .SetProjectFile(AegirProject));
-        });
-
     Target Compile => _ => _
         .Description("Build project")
         .Requires(() => BuildConfig)
         .Requires(() => GamePath)
         .Before(PackForNexusmods)
         .Before(PackForThunderstore)
-        .After(Restore)
         .Executes(() =>
         {
             DotNetBuild(s => s
@@ -106,27 +77,46 @@ class Build : FalloutBuild
                 .AddProperty("GamePath", GamePath)
                 .EnableNoRestore());
         });
+    
+    
+    string ProjectTargetFramework => AegirProject.GetTargetFrameworks()!.First();
+    string CompiledFileName => AegirProject.Name + ".dll";
+    
+    AbsolutePath PluginsDirectory =>
+        AbsolutePath.Create(Path.Combine(GamePath, BepinexPath));
+    AbsolutePath BuildDirectory => SourceDirectory / "bin" / BuildConfig / ProjectTargetFramework;
+    AbsolutePath CompiledFilePath => BuildDirectory / CompiledFileName;
+    AbsolutePath CompiledPluginPath => PluginsDirectory / CompiledFileName;
 
     Target Install => _ => _
         .Description("Copy compiled file to game plugins directory")
         .After(Compile)
         .Executes(() =>
         {
-            CompiledPluginPath.DeleteFile();
             Log.Information("Deleting {Path}", CompiledPluginPath);
+            CompiledPluginPath.DeleteFile();
 
+            Log.Information("Copying plugin into {Target}", PluginsDirectory);
             CompiledFilePath.CopyToDirectory(PluginsDirectory);
-            Log.Information("Plugin copied to {Target}", PluginsDirectory);
         });
+    
+    string PackedFileName => AegirProject.Name + "-" + AegirProject.GetProperty("version") + ".zip";
+    static AbsolutePath ArchiveDirectory => RootDirectory / "_tmp";
+    static AbsolutePath NexusModsOutputDirectory => OutputDirectory / "NexusMods";
+    static AbsolutePath NexusModsDistDirectory => RootDirectory / "dist" / "NexusMods";
+    static AbsolutePath NexusModsChangelog => NexusModsDistDirectory / "CHANGELOG.txt";
+    static AbsolutePath NexusModsPartChangelog => NexusModsDistDirectory / "CHANGELOG.part.txt";
 
     Target PackForNexusmods => _ => _
         .Description("Archive compiled and other necessary files for NexusMods in output directory")
         .After(Compile)
         .Executes(() =>
         {
+            Log.Information("Preparing output dirs");
             NexusModsOutputDirectory.CreateOrCleanDirectory();
             ArchiveDirectory.CreateOrCleanDirectory();
             
+            Log.Information("Generating changelog");
             var currentVersion = AegirProject.GetProperty("version");
             var changelog = MainChangelog.ReadAllLines()[1..];
 
@@ -154,24 +144,35 @@ class Build : FalloutBuild
             
             CompiledFilePath.CopyToDirectory(ArchiveDirectory);
             
+            Log.Information("Archiving files to {Target}", NexusModsOutputDirectory);
             ArchiveDirectory.ZipTo(packedFile);
             NexusModsDistDirectory
                 .GetFiles()
                 .WhereNot(file => file.Name.Equals("CHANGELOG.part.txt"))
                 .ForEach(file => file.CopyToDirectory(NexusModsOutputDirectory));
-            
+
+            Log.Information("Clearing temporal dirs and files");
             currentChangelogFile.DeleteFile();
             NexusModsChangelog.DeleteFile();
             ArchiveDirectory.DeleteDirectory();
 
-            Log.Information("Packed files to {Target}", NexusModsOutputDirectory);
         });
+    
+    static AbsolutePath ThunderStoreOutputDirectory => OutputDirectory / "ThunderStore";
+    static AbsolutePath ThunderStoreDistDirectory => RootDirectory / "dist" / "ThunderStore";
+    static AbsolutePath ThunderStoreChangelog => ThunderStoreDistDirectory / "CHANGELOG.md";
+    static AbsolutePath ThunderStorePartConfigFile => ThunderStoreDistDirectory / "thunderstore.part.toml";
+    static AbsolutePath ThunderStoreConfigFile => RootDirectory / "thunderstore.toml";
 
     Target PackForThunderstore => _ => _
         .Description("Archive compiled and other necessary files for ThunderStore in output directory")
         .After(Compile)
         .Executes(() =>
         {
+            Log.Information("Preparing output dirs");
+            ThunderStoreOutputDirectory.CreateOrCleanDirectory();
+            
+            Log.Information("Generating changelog");
             var changelog = MainChangelog.ReadAllLines()
                 .TakeUntil(line => line.StartsWith('['))
                 .Select(line => line.Replace("[", "").Replace("]", ""))
@@ -183,6 +184,7 @@ class Build : FalloutBuild
 
             var currentVersion = AegirProject.GetProperty("version");
             
+            Log.Information("Generating ThunderStore config file");
             {
                 using var input = File.OpenRead(ThunderStorePartConfigFile);
                 var table = TomlSerializer.Deserialize<TomlTable>(input)!;
@@ -196,8 +198,7 @@ class Build : FalloutBuild
 
                 build.Add(new TomlTable
                 {
-                    ["source"] = Path.Combine("../..",
-                        Path.GetRelativePath(RootDirectory.ToString(), CompiledFilePath.ToString())),
+                    ["source"] = RelativeRootDirectory(CompiledFilePath).ToString(),
                     ["target"] = "./Aegir.dll"
                 });
 
@@ -207,13 +208,13 @@ class Build : FalloutBuild
                 using var config = File.Create(ThunderStoreConfigFile);
                 TomlSerializer.Serialize(config, table);
             }
-
-            DotNet($"tcli build --config-path {ThunderStoreConfigFile} --package-version {currentVersion}");
             
+            Log.Information("Building ThunderStore package in {Target}", ThunderStoreOutputDirectory);
+            DotNet($"tcli build --config-path {RelativeRootDirectory(ThunderStoreConfigFile)} --package-version {currentVersion}");
+            
+            Log.Information("Clearing temporal dirs and files");
             ThunderStoreChangelog.DeleteFile();
             ThunderStoreConfigFile.DeleteFile();
-            
-            Log.Information("Packed files to {Target}", ThunderStoreOutputDirectory);
         });
 
     Target Pack => _ => _

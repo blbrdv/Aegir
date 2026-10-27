@@ -29,8 +29,7 @@
         "Install",
         "Pack",
         "PackForNexusmods",
-        "PackForThunderstore",
-        "Restore"
+        "PackForThunderstore"
       ]
     },
     "Verbosity": {
