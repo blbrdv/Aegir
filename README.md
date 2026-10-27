@@ -55,8 +55,6 @@ Targets (with their direct dependencies):
 
   Clean               
     Clean build and output directories
-  Restore             
-    Look for and download project dependencies
   Compile (default)   
     Build project
   Install             
