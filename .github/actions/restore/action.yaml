@@ -24,11 +24,11 @@ runs:
           deps="${{ github.workspace }}/build/packages.lock.json"
           restore_cmd="dotnet restore ${{ github.workspace }}/build/_build.csproj"
         else
-          deps=$(cat << 'EOF'
+          IFS='' read -r -d '' deps <<"EOF"
           ${{ github.workspace }}/build/packages.lock.json
           ${{ github.workspace }}/src/packages.lock.json
           EOF
-          )
+          
           restore_cmd="dotnet restore"
         fi
           
