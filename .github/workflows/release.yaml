@@ -37,6 +37,7 @@ jobs:
       name: ${{ steps.props.outputs.name }}
       author: ${{ steps.props.outputs.author }}
       version: ${{ steps.props.outputs.version }}
+      tfm: ${{ steps.props.outputs.tfm }}
 
     steps:
       - uses: actions/checkout@v7
@@ -59,6 +60,7 @@ jobs:
           echo "name=${info[0]}" >> "$GITHUB_OUTPUT"
           echo "author=${info[1]}" >> "$GITHUB_OUTPUT"
           echo "version=${info[2]}" >> "$GITHUB_OUTPUT"
+          echo "tfm=${info[3]}" >> "$GITHUB_OUTPUT"
 
       - name: Build
         uses: ./.github/actions/build
@@ -108,6 +110,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: plugin-${{ github.sha }}
+          path: ${{ github.workspace }}/src/bin/Release/${{ needs.build.outputs.tfm }}
 
       - name: Parse changelog
         id: changelog_reader
@@ -146,6 +149,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: plugin-${{ github.sha }}
+          path: ${{ github.workspace }}/src/bin/Release/${{ needs.build.outputs.tfm }}
 
       - name: Pack
         run: ./run.sh PackForThunderstore --build-config Release
@@ -173,6 +177,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: plugin-${{ github.sha }}
+          path: ${{ github.workspace }}/src/bin/Release/${{ needs.build.outputs.tfm }}
         
       - name: Pack
         run: ./run.sh PackForNexusMods --build-config Release
