@@ -128,7 +128,7 @@ jobs:
           body: ${{ steps.changelog_reader.outputs.changes }}
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: false
-          artifacts: ${{ github.workspace }}/${{ needs.build.outputs.name }}.dll
+          artifacts: ${{ github.workspace }}/src/bin/Release/${{ needs.build.outputs.tfm }}/${{ needs.build.outputs.name }}.dll
   
   thunderstore-release:
     if: ${{ case( github.event_name == 'workflow_dispatch', inputs.thunderstore, true ) }}
