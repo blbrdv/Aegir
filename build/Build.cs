@@ -152,8 +152,6 @@ class Build : FalloutBuild
                 .ForEach(file => file.CopyToDirectory(NexusModsOutputDirectory));
 
             Log.Information("Clearing temporal dirs and files");
-            currentChangelogFile.DeleteFile();
-            NexusModsChangelog.DeleteFile();
             ArchiveDirectory.DeleteDirectory();
 
         });
