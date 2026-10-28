@@ -158,7 +158,7 @@ jobs:
         if: ${{ !github.event.act }}
         run: >
           dotnet tcli publish
-          --file ${{ github.workspace }}/output/ThunderStore/${{ needs.build.outputs.author }}-${{ needs.build.outputs.name }}-${{ needs.build.outputs.version }}.dll
+          --file ./output/ThunderStore/${{ needs.build.outputs.author }}-${{ needs.build.outputs.name }}-${{ needs.build.outputs.version }}.zip
           --token ${{ secrets.TS_TOKEN }}
   
   nexusmods-release:
