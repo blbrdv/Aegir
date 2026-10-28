@@ -209,12 +209,8 @@ class Build : FalloutBuild
                 TomlSerializer.Serialize(config, table);
             }
             
-            Log.Information("Building ThunderStore package in {Target}", ThunderStoreOutputDirectory);
+            Log.Information("Building ThunderStore package");
             DotNet($"tcli build --config-path {RelativeRootDirectory(ThunderStoreConfigFile)} --package-version {currentVersion}");
-            
-            Log.Information("Clearing temporal dirs and files");
-            ThunderStoreChangelog.DeleteFile();
-            ThunderStoreConfigFile.DeleteFile();
         });
 
     Target Pack => _ => _
