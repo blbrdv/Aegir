@@ -156,7 +156,10 @@ jobs:
 
       - name: Publish
         if: ${{ !github.event.act }}
-        run: dotnet tcli publish --token ${{ secrets.TS_TOKEN }}
+        run: >
+          dotnet tcli publish
+          --file ${{ github.workspace }}/output/ThunderStore/${{ needs.build.outputs.author }}-${{ needs.build.outputs.name }}-${{ needs.build.outputs.version }}.dll
+          --token ${{ secrets.TS_TOKEN }}
   
   nexusmods-release:
     if: ${{ case( github.event_name == 'workflow_dispatch', inputs.nexusmods, true ) }}
