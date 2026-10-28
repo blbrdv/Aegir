@@ -22,5 +22,5 @@ target = "./CHANGELOG.md"
 repository = "https://thunderstore.io"
 communities = [ "valheim" ]
 
-[publish]
-categories = [ "mods", "misc", "client-side" ]
+[publish.categories]
+valheim = [ "mods", "misc", "client-side" ]
