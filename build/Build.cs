@@ -31,7 +31,7 @@ class Build : FalloutBuild
     // ReSharper disable once InconsistentNaming
     [Parameter("Path to the root of game folder")] 
     readonly string GamePath;
-
+    
     // ReSharper disable once InconsistentNaming
     [Fallout.Common.ProjectModel.Solution(GenerateProjects = true)] 
     readonly Solution Solution;
@@ -53,10 +53,10 @@ class Build : FalloutBuild
         .Executes(() =>
         {
             var buildDirs = SourceDirectory.GlobDirectories("**/bin", "**/obj");
-            if (buildDirs.Count > 0)
+            foreach (var dir in buildDirs)
             {
-                Log.Information("Removing dirs [{Dirs}]", string.Join(", ", buildDirs));
-                buildDirs.DeleteDirectories();
+                Log.Information("Removing '{Directory}'", dir);
+                dir.DeleteDirectory();
             }
 
             Log.Information("Removing {Directory}", OutputDirectory);
