@@ -10,7 +10,8 @@ SCRIPT_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
 ###########################################################################
 
 BUILD_PROJECT_FILE="$SCRIPT_DIR/build/_build.csproj"
-TEMP_DIRECTORY="$SCRIPT_DIR//.fallout/temp"
+CONFIG_DIRECTORY="$SCRIPT_DIR//.fallout"
+TEMP_DIRECTORY="$CONFIG_DIRECTORY/temp"
 
 DOTNET_GLOBAL_FILE="$SCRIPT_DIR//global.json"
 DOTNET_INSTALL_URL="https://dot.net/v1/dotnet-install.sh"
@@ -58,5 +59,11 @@ fi
 
 echo "Microsoft (R) .NET SDK version $("$DOTNET_EXE" --version)"
 
+FALLOUT_PROFILES=("--profile base")
+
+if [[ -f "$CONFIG_DIRECTORY/parameters.local.json" ]]; then
+    FALLOUT_PROFILES+=" --profile local"
+fi
+
 "$DOTNET_EXE" build "$BUILD_PROJECT_FILE" /nodeReuse:false /p:UseSharedCompilation=false -nologo -clp:NoSummary --verbosity quiet -c Release
-"$DOTNET_EXE" run --project "$BUILD_PROJECT_FILE" --no-build -c Release -- "$@"
+"$DOTNET_EXE" run --project "$BUILD_PROJECT_FILE" --no-build -c Release -- "$@" ${FALLOUT_PROFILES[@]}
