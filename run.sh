@@ -59,11 +59,11 @@ fi
 
 echo "Microsoft (R) .NET SDK version $("$DOTNET_EXE" --version)"
 
-FALLOUT_PROFILES=("--profile base")
+FALLOUT_PROFILES=""
 
 if [[ -f "$CONFIG_DIRECTORY/parameters.local.json" ]]; then
-    FALLOUT_PROFILES+=" --profile local"
+    FALLOUT_PROFILES+="--profile base --profile local"
 fi
 
 "$DOTNET_EXE" build "$BUILD_PROJECT_FILE" /nodeReuse:false /p:UseSharedCompilation=false -nologo -clp:NoSummary --verbosity quiet -c Release
-"$DOTNET_EXE" run --project "$BUILD_PROJECT_FILE" --no-build -c Release -- "$@" ${FALLOUT_PROFILES[@]}
+"$DOTNET_EXE" run --project "$BUILD_PROJECT_FILE" --no-build -c Release -- "$@" "$FALLOUT_PROFILES"

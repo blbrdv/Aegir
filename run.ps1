@@ -66,12 +66,12 @@ else {
 
 Write-Output "Microsoft (R) .NET SDK version $(& $env:DOTNET_EXE --version)"
 
-$FalloutProfiles = @("--profile base")
+$FalloutProfiles = ""
 
 $LocalParametersPath = Join-Path $ConfigDirectory '/parameters.local.json'
 if (Test-Path $LocalParametersPath) {
-    $FalloutProfiles += "--profile local"
+    $FalloutProfiles = "--profile base --profile local"
 }
 
 ExecSafe { & $env:DOTNET_EXE build $BuildProjectFile /nodeReuse:false /p:UseSharedCompilation=false -nologo -clp:NoSummary --verbosity quiet -c Release }
-ExecSafe { & $env:DOTNET_EXE run --project $BuildProjectFile --no-build -c Release -- $BuildArguments ([string]$FalloutProfiles) }
+ExecSafe { & $env:DOTNET_EXE run --project $BuildProjectFile --no-build -c Release -- $BuildArguments $FalloutProfiles
