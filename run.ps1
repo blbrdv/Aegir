@@ -14,7 +14,8 @@ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 ###########################################################################
 
 $BuildProjectFile = Join-Path $PSScriptRoot '/build/_build.csproj'
-$TempDirectory = Join-Path $PSScriptRoot '/.fallout/temp'
+$ConfigDirectory = Join-Path $PSScriptRoot '/.fallout'
+$TempDirectory = Join-Path $ConfigDirectory '/temp'
 
 $DotNetGlobalFile = Join-Path $PSScriptRoot '/global.json'
 $DotNetInstallUrl = "https://dot.net/v1/dotnet-install.ps1"
@@ -65,5 +66,12 @@ else {
 
 Write-Output "Microsoft (R) .NET SDK version $(& $env:DOTNET_EXE --version)"
 
+$FalloutProfiles = ""
+
+$LocalParametersPath = Join-Path $ConfigDirectory '/parameters.local.json'
+if (Test-Path $LocalParametersPath) {
+    $FalloutProfiles = "--profile base --profile local"
+}
+
 ExecSafe { & $env:DOTNET_EXE build $BuildProjectFile /nodeReuse:false /p:UseSharedCompilation=false -nologo -clp:NoSummary --verbosity quiet -c Release }
-ExecSafe { & $env:DOTNET_EXE run --project $BuildProjectFile --no-build -c Release -- $BuildArguments }
+ExecSafe { & $env:DOTNET_EXE run --project $BuildProjectFile --no-build -c Release -- $BuildArguments $FalloutProfiles }

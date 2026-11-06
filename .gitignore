@@ -59,6 +59,7 @@ nunit-*.xml
 # build
 .fake
 .fallout/temp
+.fallout/parameters.local.json
 
 # zip release directory
 output
