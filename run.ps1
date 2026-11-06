@@ -74,4 +74,4 @@ if (Test-Path $LocalParametersPath) {
 }
 
 ExecSafe { & $env:DOTNET_EXE build $BuildProjectFile /nodeReuse:false /p:UseSharedCompilation=false -nologo -clp:NoSummary --verbosity quiet -c Release }
-ExecSafe { & $env:DOTNET_EXE run --project $BuildProjectFile --no-build -c Release -- $BuildArguments $FalloutProfiles
+ExecSafe { & $env:DOTNET_EXE run --project $BuildProjectFile --no-build -c Release -- $BuildArguments $FalloutProfiles }
