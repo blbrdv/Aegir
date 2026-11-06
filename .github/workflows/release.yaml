@@ -189,7 +189,10 @@ jobs:
         id: current-changelog
         run: |
           set -ex
-          echo "value=$(cat ${{ github.workspace }}/dist/NexusMods/CHANGELOG.${{ needs.build.outputs.version }}.txt)" >> "$GITHUB_OUTPUT"
+          changelog=$(cat ${{ github.workspace }}/dist/NexusMods/CHANGELOG.${{ needs.build.outputs.version }}.txt)
+          echo "value<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$changelog" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Publish
         if: ${{ !github.event.act }}
